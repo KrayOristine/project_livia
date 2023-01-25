@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using WCSharp.Events;
 using WCSharp.Sync;
 using static War3Api.Common;
@@ -35,7 +36,18 @@ namespace Source
 				SyncSystem.EnableDebug();
 #endif
 
-				Console.WriteLine("Hello, Azeroth.");
+                foreach (var type in Assembly.GetExecutingAssembly().GetExportedTypes())
+                {
+                    if (!type.Namespace.StartsWith("Source."))
+                    {
+                        continue;
+                    }
+
+                    var init = type.GetMethod("Init");
+                    init?.Invoke(null, null);
+                }
+
+                Console.WriteLine("Hello, Azeroth.");
 			}
 			catch (Exception ex)
 			{
