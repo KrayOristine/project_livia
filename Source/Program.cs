@@ -1,8 +1,15 @@
-﻿using System;
+﻿using Source.Utils;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using WCSharp.Events;
 using WCSharp.Sync;
+using static Source.Utils.Logger;
+using static Source.Utils.WarEX;
 using static War3Api.Common;
+using Source.Modules;
+using Source.Library;
+using Source.Trigger;
 
 namespace Source
 {
@@ -34,20 +41,51 @@ namespace Source
 				PeriodicEvents.EnableDebug();
 				PlayerUnitEvents.EnableDebug();
 				SyncSystem.EnableDebug();
+
+				CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
+                CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
 #endif
+                try {
+                    // Initialize core property (because they will be shared for other scripts and they don't require any other than themselves)
 
-                foreach (var type in Assembly.GetExecutingAssembly().GetExportedTypes())
-                {
-                    if (!type.Namespace.StartsWith("Source."))
-                    {
-                        continue;
-                    }
+                    WarEX.Init();
 
-                    var init = type.GetMethod("Init");
-                    init?.Invoke(null, null);
+				} catch (Exception ex)
+				{
+					Logger.Error("Init Engine", ex.Message);
+				}
+
+				try
+				{
+					// Modules Init (these will be used though-out other scripts)
+
+					Damage.Init();
+				} catch (Exception ex)
+				{
+					Logger.Error("Init Engine", ex.Message);
                 }
 
-                Console.WriteLine("Hello, Azeroth.");
+                try
+                {
+					// Library Init (these will be used for trigger like line-segment, etc.
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Init Engine", ex.Message);
+                }
+
+                try
+                {
+					// Trigger Init
+
+                    DamageTags.Init();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Init Engine", ex.Message);
+                }
+
+				Logger.Debug("Init Engine", "Init completed");
 			}
 			catch (Exception ex)
 			{
