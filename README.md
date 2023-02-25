@@ -2,7 +2,7 @@
  This is the C# version of the maps but no longer used as for now.
  There is maybe an update to port TS version into C#
  
- [This work](https://github.com/KrayOristine/hdef_cs) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International  ![](https://chooser-beta.creativecommons.org/img/cc-logo.f0ab4ebe.svg)![](https://chooser-beta.creativecommons.org/img/cc-by.21b728bb.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
+ [This work](https://github.com/KrayOristine/hdef_cs) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
 
 
 
