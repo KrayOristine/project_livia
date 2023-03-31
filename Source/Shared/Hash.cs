@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Source.Utils
+namespace Source.Shared
 {
     public static class Hash
     {
@@ -21,13 +20,13 @@ namespace Source.Utils
 
             while (l >= 4)
             {
-                k = (bytes[i] & 0xff) | ((bytes[++i] & 0xff) << 8) | ((bytes[++i] & 0xff) << 16) | ((bytes[++i] & 0xff) << 24);
+                k = bytes[i] & 0xff | (bytes[++i] & 0xff) << 8 | (bytes[++i] & 0xff) << 16 | (bytes[++i] & 0xff) << 24;
 
-                k = (k & 0xffff) * 0x5bd1e995 + ((((k >> 16) * 0x5bd1e995) & 0xffff) << 16);
+                k = (k & 0xffff) * 0x5bd1e995 + (((k >> 16) * 0x5bd1e995 & 0xffff) << 16);
                 k ^= k >> 24;
-                k = (k & 0xffff) * 0x5bd1e995 + ((((k >> 16) * 0x5bd1e995) & 0xffff) << 16);
+                k = (k & 0xffff) * 0x5bd1e995 + (((k >> 16) * 0x5bd1e995 & 0xffff) << 16);
 
-                h = ((h & 0xffff) * 0x5bd1e995 + ((((h >> 16) * 0x5bd1e995) & 0xffff) << 16)) ^ k;
+                h = (h & 0xffff) * 0x5bd1e995 + (((h >> 16) * 0x5bd1e995 & 0xffff) << 16) ^ k;
 
                 l -= 4;
                 ++i;
@@ -43,12 +42,12 @@ namespace Source.Utils
                     break;
                 case 1:
                     h ^= bytes[i] & 0xff;
-                    h = (h & 0xffff) * 0x5bd1e995 + ((((h >> 16) * 0x5bd1e995) & 0xffff) << 16);
+                    h = (h & 0xffff) * 0x5bd1e995 + (((h >> 16) * 0x5bd1e995 & 0xffff) << 16);
                     break;
             }
 
             h ^= h >> 13;
-            h = (h & 0xffff) * 0x5bd1e995 + ((((h >> 16) * 0x5bd1e995) & 0xffff) << 16);
+            h = (h & 0xffff) * 0x5bd1e995 + (((h >> 16) * 0x5bd1e995 & 0xffff) << 16);
             h ^= h >> 15;
             h >>= 0;
 
@@ -73,17 +72,17 @@ namespace Source.Utils
 
             while (i < bytes)
             {
-                k1 = (key[i] & 0xff) | ((key[++i] & 0xff) << 8) | ((key[++i] & 0xff) << 16) | ((key[++i] & 0xff) << 24);
+                k1 = key[i] & 0xff | (key[++i] & 0xff) << 8 | (key[++i] & 0xff) << 16 | (key[++i] & 0xff) << 24;
                 ++i;
 
-                k1 = ((k1 & 0xffff) * c1 + ((((k1 >> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
-                k1 = (k1 << 15) | (k1 >> 17);
-                k1 = ((k1 & 0xffff) * c2 + ((((k1 >> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
+                k1 = (k1 & 0xffff) * c1 + (((k1 >> 16) * c1 & 0xffff) << 16) & 0xffffffff;
+                k1 = k1 << 15 | k1 >> 17;
+                k1 = (k1 & 0xffff) * c2 + (((k1 >> 16) * c2 & 0xffff) << 16) & 0xffffffff;
 
                 h1 ^= k1;
-                h1 = (h1 << 13) | (h1 >> 19);
-                h1b = ((h1 & 0xffff) * 5 + ((((h1 >> 16) * 5) & 0xffff) << 16)) & 0xffffffff;
-                h1 = (h1b & 0xffff) + 0x6b64 + ((((h1b >> 16) + 0xe654) & 0xffff) << 16);
+                h1 = h1 << 13 | h1 >> 19;
+                h1b = (h1 & 0xffff) * 5 + (((h1 >> 16) * 5 & 0xffff) << 16) & 0xffffffff;
+                h1 = (h1b & 0xffff) + 0x6b64 + (((h1b >> 16) + 0xe654 & 0xffff) << 16);
             }
 
             k1 = 0;
@@ -101,18 +100,18 @@ namespace Source.Utils
                         k1 ^= key[i] & 0xff;
                         break;
                 }
-                k1 = ((k1 & 0xffff) * c1 + ((((k1 >> 16) * c1) & 0xffff) << 16)) & 0xffffffff;
-                k1 = (k1 << 15) | (k1 >> 17);
-                k1 = ((k1 & 0xffff) * c2 + ((((k1 >> 16) * c2) & 0xffff) << 16)) & 0xffffffff;
+                k1 = (k1 & 0xffff) * c1 + (((k1 >> 16) * c1 & 0xffff) << 16) & 0xffffffff;
+                k1 = k1 << 15 | k1 >> 17;
+                k1 = (k1 & 0xffff) * c2 + (((k1 >> 16) * c2 & 0xffff) << 16) & 0xffffffff;
                 h1 ^= k1;
             }
 
             h1 ^= key.Length;
 
             h1 ^= h1 >> 16;
-            h1 = ((h1 & 0xffff) * 0x85ebca6b + ((((h1 >> 16) * 0x85ebca6b) & 0xffff) << 16)) & 0xffffffff;
+            h1 = (h1 & 0xffff) * 0x85ebca6b + (((h1 >> 16) * 0x85ebca6b & 0xffff) << 16) & 0xffffffff;
             h1 ^= h1 >> 13;
-            h1 = ((h1 & 0xffff) * 0xc2b2ae35 + ((((h1 >> 16) * 0xc2b2ae35) & 0xffff) << 16)) & 0xffffffff;
+            h1 = (h1 & 0xffff) * 0xc2b2ae35 + (((h1 >> 16) * 0xc2b2ae35 & 0xffff) << 16) & 0xffffffff;
             h1 ^= h1 >> 16;
             h1 >>= 0;
             cacheTable2.Add(data + seed.ToString(), h1);

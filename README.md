@@ -1,16 +1,34 @@
-# Ozzzzymaniac - Mushroom Defense but C#
- This is the C# version of the maps but no longer used as for now.
- There is maybe an update to port TS version into C#
- 
- [This work](https://github.com/KrayOristine/hdef_cs) © 2023 by [Kray Oristine](https://github.com/KrayOristine) is licensed under  [Attribution-NonCommercial-ShareAlike 4.0 International](http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1)
 
+# Ozzzzymaniac - Mushroom Defense
 
+ A Warcraft III Refunded defense map that coded in [**C#**](https://github.com/dotnet/csharplang) and powered by [**CSharp.lua**](https://github.com/yanghuan/CSharp.lua)
 
-Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+ Current version: 0.0.1
 
+ [CHANGELOG](./CHANGELOG.md)
 
-[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+## Map Resources Credit
 
-[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
-[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
-[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+  Here the list of all the resources that this map used and from multiple origin, if your name does not appear in here. Just file an issue in the github repository and please label it as `missing resources` for faster response time
+
+- [The Hive Workshop](./RESOURCES_HIVE.md)
+
+## Original Template
+
+[WCSharp Template](https://github.com/Orden4/WCSharp/wiki/WCSharp-template) - by [Orden4](https://github.com/Orden4)
+
+## License
+
+[GNU GPLv3](./LICENSE)
+
+## Contact
+
+- Mail: trantrungho71@gmail.com
+
+## Credit
+
+This map powered by [**CSharp.lua**](https://github.com/yanghuan/CSharp.lua)
+
+This map also use code provided from [**WCSharp**](https://github.com/Orden4/WCSharp)
+
+Most of this maps resources is from [**The Hive Workshop**](https://hiveworkshop.com/)

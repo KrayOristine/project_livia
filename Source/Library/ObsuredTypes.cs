@@ -2,6 +2,17 @@
 
 namespace Source.Library
 {
+    /*
+     * Obscured Types
+     *
+     * Protect your values from memory scanning by obfuscating it!
+     * Has heavy performance impact when used multiple times without caching
+     *
+     * Version: 0.1
+     *
+     * Features:
+     *  + For now only support primitive integer values, but soon will be updated for usage with float
+     */
 
     public class ObscuredInt
     {
@@ -13,7 +24,7 @@ namespace Source.Library
 
         public ObscuredInt(int value, int key = 0x7fffffff)
         {
-            if (value < key) key = 0x7fffffff;
+            if (value > key && key == 0x7fffffff) throw new OverflowException("Integer overflow!");
             epsilon = value;
             beta = value;
             gamma = value;
@@ -21,7 +32,8 @@ namespace Source.Library
             obscured = Convert.ToString(~value & key, 32);
         }
 
-        public int Truth {
+        public int Truth
+        {
             get
             {
                 int t = key ^ Convert.ToInt32(obscured, 32);
@@ -57,7 +69,8 @@ namespace Source.Library
         public static ObscuredInt operator *(int a, ObscuredInt b) => new(a * b.Truth);
 
         // Divide operator
-        public static ObscuredInt operator /(ObscuredInt a, ObscuredInt b) {
+        public static ObscuredInt operator /(ObscuredInt a, ObscuredInt b)
+        {
             int an = a.Truth;
             int bn = b.Truth;
             if (bn == 0) { throw new DivideByZeroException(); }

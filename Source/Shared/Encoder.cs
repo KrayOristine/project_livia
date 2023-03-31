@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Source.Utils
+﻿namespace Source.Shared
 {
     public static class Encoder
     {
@@ -13,7 +7,7 @@ namespace Source.Utils
             uint[] result = new uint[data.Length];
             for (int i = 0; i < data.Length; i++)
             {
-                result[i] = (uint)data[i];
+                result[i] = data[i];
             }
             return result;
         }

@@ -3,28 +3,26 @@
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <Optimize>true</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="..\artifacts\war3map.lua" Link="war3map.lua" />
+		<None Include="..\Artifacts\war3map.lua" Link="war3map.lua" />
+    <None Include="..\*"/>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="War3Api.Blizzard" Version="1.33.0" />
 		<PackageReference Include="War3Api.Common" Version="1.33.0" />
-		<PackageReference Include="WCSharp.Buffs" Version="2.1.0" />
-		<PackageReference Include="WCSharp.DateTime" Version="2.1.0" />
+		<PackageReference Include="WCSharp.Buffs" Version="2.1.2" />
+		<PackageReference Include="WCSharp.DateTime" Version="2.1.3" />
 		<PackageReference Include="WCSharp.Dummies" Version="2.1.0" />
 		<PackageReference Include="WCSharp.Effects" Version="2.1.0" />
-		<PackageReference Include="WCSharp.Events" Version="2.1.0" />
+		<PackageReference Include="WCSharp.Events" Version="2.1.1" />
 		<PackageReference Include="WCSharp.Json" Version="2.1.1" />
 		<PackageReference Include="WCSharp.Knockbacks" Version="2.1.0" />
 		<PackageReference Include="WCSharp.Lightnings" Version="2.1.0" />
-		<PackageReference Include="WCSharp.Missiles" Version="2.1.0" />
-		<PackageReference Include="WCSharp.SaveLoad" Version="2.1.1" />
-		<PackageReference Include="WCSharp.Shared" Version="2.1.0" />
-		<PackageReference Include="WCSharp.Sync" Version="2.1.0" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Library\" />
-    <Folder Include="Utils\" />
+		<PackageReference Include="WCSharp.Missiles" Version="2.1.2" />
+		<PackageReference Include="WCSharp.SaveLoad" Version="2.1.8" />
+		<PackageReference Include="WCSharp.Shared" Version="2.1.3" />
+		<PackageReference Include="WCSharp.Sync" Version="2.1.1" />
 	</ItemGroup>
 </Project>

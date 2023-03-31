@@ -1,33 +1,26 @@
-﻿using System;
-using static War3Api.Common;
-using static War3Api.Blizzard;
-using WCSharp.Shared;
+﻿using static War3Api.Common;
 
-namespace Source.Utils
+namespace Source.Shared
 {
     public static class WarEX
     {
 #pragma warning disable CS0626
 #pragma warning disable S4200
-        /// <summary>
         /// @CSharpLua.Template = "BlzGetHeroPrimaryStat({0})"
-        /// </summary>
         public static extern int BlzGetHeroPrimaryStat(unit u);
 
-        /// <summary>
         /// @CSharpLua.Template = "BlzSetHeroStatEx({0})"
-        /// </summary>
         public static extern void BlzSetHeroStatEx(unit u, int i, int amt);
 
-        /// <summary>
         /// @CSharpLua.Template = "BlzGetHeroStat({0})"
-        /// </summary>
         public static extern int BlzGetHeroStat(unit u, int i);
 #pragma warning restore S4200
 #pragma warning restore CS0626
 
 
-        internal static location? zeroLoc;
+        internal static location zeroLoc = Location(0,0);
+
+        public static readonly boolexpr SafeFilter = Filter(() => true);
 
         public static string EXStringHash(string str)
         {
@@ -88,12 +81,50 @@ namespace Source.Utils
         /// </summary>
         public static float EXGetUnitZ(unit u)
         {
-            return (EXGetLocationZ(GetUnitX(u), GetUnitY(u)) + GetUnitFlyHeight(u));
+            return EXGetLocationZ(GetUnitX(u), GetUnitY(u)) + GetUnitFlyHeight(u);
         }
 
-        public static void Init()
+        public static void EXGroupEnumUnitInRect(group g, rect r, boolexpr? filter)
         {
-            zeroLoc = Location(0, 0);
+            filter ??= SafeFilter;
+
+            GroupEnumUnitsInRect(g, r, filter);
+            DestroyBoolExpr(filter);
+        }
+
+        public static void EXGroupEnumUnitInRange(group g, float x, float y, float radius, boolexpr? filter)
+        {
+            filter ??= SafeFilter;
+
+            GroupEnumUnitsInRange(g, x, y, radius, filter);
+            DestroyBoolExpr(filter);
+        }
+
+        public static void EXGroupEnumUnitInRangeOfLoc(group g, location l, float radius, boolexpr? filter, bool wantDestroy = false)
+        {
+            float x = l == null ? 0 : GetLocationX(l);
+            float y = l == null ? 0 : GetLocationY(l);
+            filter ??= SafeFilter;
+
+            GroupEnumUnitsInRange(g, x, y, radius, filter);
+            if (wantDestroy) RemoveLocation(l);
+            DestroyBoolExpr(filter);
+        }
+
+        public static void EXGroupEnumUnitOfPlayer(group g, player p, boolexpr? filter)
+        {
+            filter ??= SafeFilter;
+
+            GroupEnumUnitsOfPlayer(g, p, filter);
+            DestroyBoolExpr(filter);
+        }
+
+        public static void EXGroupEnumUnitSelected(group g, player p, boolexpr? filter)
+        {
+            filter ??= SafeFilter;
+
+            GroupEnumUnitsSelected(g, p, filter);
+            DestroyBoolExpr(filter);
         }
     }
 }

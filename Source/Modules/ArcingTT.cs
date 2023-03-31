@@ -1,79 +1,89 @@
 ﻿using System;
-using static War3Api.Common;
+using WCSharp.Events;
 using static War3Api.Blizzard;
+using static War3Api.Common;
+
 
 namespace Source.Modules
 {
-    public sealed class ArcingTT
+    public sealed class ArcingTT : IPeriodicAction
     {
-         internal static readonly float SIZE_MIN = 0.018f; // Minimum size of text
-         internal static readonly float SIZE_BONUS = 0.012f; // Text size increase
-         internal static readonly float TIME_LIFE = 1.0f; // How long the text lasts
-         internal static readonly float TIME_FADE = 0.8f; // When does the text start to fade
-         internal static readonly int Z_OFFSET = 70; // Height above unit
-         internal static readonly int Z_OFFSET_BON = 40; // How much extra height the text gains
-         internal static readonly int VELOCITY = 2; //  How fast the text moves in x/y plane
-         internal static readonly float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
-         internal static readonly bool ANGLE_RND = true; // Is the angle random or fixed
+        internal const float SIZE_MIN = 0.018f; // Minimum size of text
+        internal const float SIZE_BONUS = 0.012f; // Text size increase
+        internal const float TIME_LIFE = 1.0f; // How long the text lasts
+        internal const float TIME_FADE = 0.8f; // When does the text start to fade
+        internal const int Z_OFFSET = 70; // Height above unit
+        internal const int Z_OFFSET_BON = 50; // How much extra height the text gains
+        internal const int VELOCITY = 4; //  How fast the text moves in x/y plane
+        internal const float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
 
-        private static ArcingTT lastCreated;
+        internal static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
 
-        public static ArcingTT LastCreated { get => lastCreated; }
+        public float passed = 0;
+        public float lifeSpan;
+        public float asin;
+        public float acos;
+        public float timeScale;
+        public texttag? tt;
+        public float x;
+        public float y;
+        public string text;
+        public int size;
+        public bool Active { get; set; }
 
-
-        private readonly timer tmr;
-        public ArcingTT(string str, unit u, float x, float y, float duration, int size, player p)
+        public void Action()
         {
-            tmr = CreateTimer();
-            lastCreated = Create(str, u, x, y, duration, size, p);
+            if (tt == null) return;
+            passed += 1.0f / 32.0f;
+            if (passed >= lifeSpan)
+            {
+                Active = false;
+                return;
+            }
+            float point = (float)Math.Sin(Math.PI * ((lifeSpan - passed) / timeScale));
+            x += acos;
+            y += asin;
+            SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * point);
+            SetTextTagText(tt, text, (SIZE_MIN + SIZE_BONUS * point) * size);
         }
 
-        public void Destroy()
+        internal ArcingTT(float time, float life, float asin, float acos, texttag? tt, string text, float x, float y)
         {
-            PauseTimer(tmr);
-            DestroyTimer(tmr);
+            lifeSpan = life;
+            timeScale = time;
+            this.asin = asin;
+            this.acos = acos;
+            this.tt = tt;
+            this.text = text;
+            this.x = x;
+            this.y = y;
         }
 
-        public ArcingTT Create(string str, unit u, float x, float y, float duration, int size, player p)
+        public static ArcingTT Create(string str, unit u, float x, float y, float duration, int size, player? p)
         {
-            float a = ANGLE_RND ? GetRandomReal(0, 2 * bj_PI) : ANGLE;
-            float timeScale = Math.Max(duration, 0.001f);
-            float lifeSpan = TIME_LIFE * timeScale;
-            float asin = (float)(Math.Sin(a) * VELOCITY);
-            float acos = (float)(Math.Cos(a) * VELOCITY);
-            texttag? tt = null;
+            p ??= GetLocalPlayer();
+
+            float a = GetRandomReal(0, 2 * bj_PI);
+            float time = Math.Max(duration, 0.001f);
+            float life = TIME_LIFE * time;
+            float angleSin = Sin(a) * VELOCITY;
+            float angleCos = Cos(a) * VELOCITY;
+            texttag? tag = null;
             if (IsUnitVisible(u, p))
             {
-                tt = CreateTextTag();
-                SetTextTagPermanent(tt, false);
-                SetTextTagLifespan(tt, lifeSpan);
-                SetTextTagFadepoint(tt, TIME_FADE * timeScale);
-                SetTextTagText(tt, str, SIZE_MIN * size);
-                SetTextTagPos(tt, x, y, Z_OFFSET);
+                tag = CreateTextTag();
+                SetTextTagPermanent(tag, false);
+                SetTextTagLifespan(tag, life);
+                SetTextTagFadepoint(tag, TIME_FADE * time);
+                SetTextTagText(tag, str, SIZE_MIN * size);
+                SetTextTagPos(tag, x, y, Z_OFFSET);
             }
 
-            float pass = 0;
-            TimerStart(tmr, 0.03125f, true, () => {
-                pass += 0.03125f;
-                if (tt == null) return;
-                if (pass >= lifeSpan)
-                {
-                    this.Destroy();
-                    return;
-                }
-                float point = (float)Math.Sin(bj_PI * ((lifeSpan - pass) / timeScale));
-                x += acos;
-                y += asin;
-                SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * point);
-                SetTextTagText(tt, str, (SIZE_MIN + SIZE_BONUS * point) * size);
-            });
+            var t = new ArcingTT(time, life, angleSin, angleCos, tag, str, x, y);
 
-            return this;
-        }
+            periodicTrigger.Add(t);
 
-        public static ArcingTT CreateEx(string str, unit u, float duration, int size)
-        {
-            return new(str, u, GetUnitX(u), GetUnitY(u), duration, size, GetLocalPlayer());
+            return t;
         }
     }
 }
