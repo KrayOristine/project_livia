@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using WCSharp.Events;
 using static War3Api.Blizzard;
 using static War3Api.Common;
@@ -18,6 +19,7 @@ namespace Source.Modules
         internal const float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
 
         internal static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
+        internal static readonly Stack<ArcingTT> cache = new();
 
         public float passed = 0;
         public float lifeSpan;
@@ -33,18 +35,38 @@ namespace Source.Modules
 
         public void Action()
         {
-            if (tt == null) return;
             passed += 1.0f / 32.0f;
             if (passed >= lifeSpan)
             {
                 Active = false;
+                cache.Push(this);
                 return;
             }
+			if (tt == null) return;
             float point = (float)Math.Sin(Math.PI * ((lifeSpan - passed) / timeScale));
             x += acos;
             y += asin;
             SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * point);
             SetTextTagText(tt, text, (SIZE_MIN + SIZE_BONUS * point) * size);
+        }
+
+        internal static ArcingTT GetCache(float time, float life, float asin, float acos, texttag? tt, string text, float x, float y)
+        {
+            if (cache.Count > 0)
+            {
+                var temp = cache.Pop();
+                temp.lifeSpan = life;
+                temp.timeScale = time;
+                temp.asin = asin;
+                temp.acos = acos;
+                temp.tt = tt;
+                temp.text = text;
+                temp.x = x;
+                temp.y = y;
+                return temp;
+            }
+
+            return new(time, life, asin, acos, tt, text, x, y);
         }
 
         internal ArcingTT(float time, float life, float asin, float acos, texttag? tt, string text, float x, float y)
@@ -79,7 +101,7 @@ namespace Source.Modules
                 SetTextTagPos(tag, x, y, Z_OFFSET);
             }
 
-            var t = new ArcingTT(time, life, angleSin, angleCos, tag, str, x, y);
+            var t = GetCache(time, life, angleSin, angleCos, tag, str, x, y);
 
             periodicTrigger.Add(t);
 

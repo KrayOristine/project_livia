@@ -242,14 +242,12 @@ namespace Source.Modules
 
         // Modify these 3 to confuse the cheater and save generation tools
         internal const string h_alphabet = "qjzvbxwycfukdsgnmlhtreaoip"; //default are "abcdefghijklmnopqrstuvwxyz"
-
-        internal const string h_alphabetCapitalize = "QJZVBXWYCFUKDSGNMLHTREAOIP"; // default are "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         internal const string h_number = "7390581246"; // default are "0123456789"
 
         //Modify to allow to code to generate unique combination and prevent automated code generator
-        internal const string code = ">0vyRNtD7Fg(WdYKJiEqU^.@5),1{xzHk+oSCfnjXhe_#]*2OGrlwI?acu9$3|p/ML8Z!b6~}A[BQ-smTP4<`&'=V";
+        internal const string code = ">0vyRNtD7Fg(WdYKJiEqU^.@5),1{xzHk+oSCfnjXhe_#]*2OGrlwI?acu9$3p/ML8Z!b6~}A[BQ-smTP4<`&'=V";
 
-        internal const int codeLength = 90;
+        internal const int codeLength = 89;
 
         /*
          * CONFIG SECTION ENDED
@@ -271,7 +269,7 @@ namespace Source.Modules
         {
             for (int i = 0; i < h_alphabet.Length; i++)
             {
-                if (c == h_alphabet[i] || c == h_alphabetCapitalize[i]) return i;
+                if (c == h_alphabet[i]) return i;
             }
             for (int i = 0; i < h_number.Length; i++)
             {
@@ -288,6 +286,7 @@ namespace Source.Modules
         internal static int HashString(string str)
         {
             int result = 0;
+            str = str.ToLower();
             for (int i = 0; i < str.Length; i++)
             {
                 result += HashChar(str[i]);

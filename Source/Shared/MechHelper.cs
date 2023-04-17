@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using WCSharp.Events;
 using WCSharp.Shared.Data;
+using WCSharp.Dummies;
 using static War3Api.Blizzard;
 using static War3Api.Common;
 
 namespace Source.Shared
 {
-    internal enum AbilityId
+    internal static class AbilityId
     {
-        Abun = 1096971630
+        public const int Abun = 1096971630;
+        public const int Silence = 1513107504; // Z000
+        public const int Stun = 1513107505; // Z001
+        public const int Slow = 1513107506; // Z002
     }
 
     public sealed class UnitPool
@@ -59,6 +63,9 @@ namespace Source.Shared
         }
     }
 
+    /// <summary>
+    /// General class for Fear effect
+    /// </summary>
     public sealed class FearSystem : IPeriodicDisposableAction
     {
         internal const int MAX_CHANGE = 200;
@@ -108,7 +115,7 @@ namespace Source.Shared
                 DestroyEffect(Effect);
                 Effect = null;
             }
-            UnitRemoveAbility(Target, (int)AbilityId.Abun);
+            UnitRemoveAbility(Target, AbilityId.Abun);
             if (IsSelected)
             {
                 SelectUnitAddForPlayer(Target, GetOwningPlayer(Target));
@@ -155,7 +162,7 @@ namespace Source.Shared
                 temp.Change = 0;
                 temp.IsSelected = IsUnitSelected(target, GetOwningPlayer(target));
 
-                UnitAddAbility(target, (int)AbilityId.Abun);
+                UnitAddAbility(target, AbilityId.Abun);
 
                 if (temp.IsSelected) SelectUnit(target, false);
 
@@ -190,7 +197,7 @@ namespace Source.Shared
                 temp.Change = 0;
                 temp.IsSelected = IsUnitSelected(target, GetOwningPlayer(target));
 
-                UnitAddAbility(target, (int)AbilityId.Abun);
+                UnitAddAbility(target, AbilityId.Abun);
 
                 if (temp.IsSelected) SelectUnit(target, false);
             }
@@ -239,7 +246,7 @@ namespace Source.Shared
             }
         }
 
-        public static int Init()
+        static FearSystem()
         {
             try
             {
@@ -248,22 +255,17 @@ namespace Source.Shared
                 PlayerUnitEvents.Register(UnitTypeEvent.ReceivesPointOrder, EventOnOrder);
                 PlayerUnitEvents.Register(UnitTypeEvent.ReceivesTargetOrder, EventOnOrder);
                 PlayerUnitEvents.Register(UnitTypeEvent.ReceivesUnitTypeOrder, EventOnOrder);
-
-                return 1;
             }
             catch (Exception ex)
             {
                 Logger.Error("Mech Helper", ex.ToString());
-                return -1;
             }
         }
-
-        /// <summary>
-        /// If this value equal to -1, it mean that the initialization is failed
-        /// </summary>
-        public static readonly int doInit = Init();
     }
 
+    /// <summary>
+    /// General class for Disarm effect
+    /// </summary>
     public sealed class DisarmSystem : IPeriodicDisposableAction
     {
         private static readonly Dictionary<unit, int> activeDict = new();
@@ -322,8 +324,8 @@ namespace Source.Shared
 
             activeDict[target] += apply ? 1 : -1;
 
-            if (activeDict[target] > 0) UnitAddAbility(target, (int)AbilityId.Abun);
-            else UnitRemoveAbility(target, (int)AbilityId.Abun);
+            if (activeDict[target] > 0) UnitAddAbility(target, AbilityId.Abun);
+            else UnitRemoveAbility(target, AbilityId.Abun);
         }
 
         /// <summary>
@@ -363,10 +365,140 @@ namespace Source.Shared
     }
 
     /// <summary>
-    /// General class contain all crowd control effect that is shared across script
+    /// General class contain all crowd control effect that is shared across script<br/>
+    ///
+    /// Only use to apply effect since it doesn't care any unit stats
     /// </summary>
     public static class CrowdControl
     {
+        internal static group g = CreateGroup();
 
+        internal static void ModifyDuration(unit target, int id, ability abil, float time)
+        {
+            BlzSetAbilityRealLevelField(abil, ABILITY_RLF_DURATION_NORMAL, 0, time);
+            BlzSetAbilityRealLevelField(abil, ABILITY_RLF_DURATION_HERO, 0, time);
+            IncUnitAbilityLevel(target, id);
+            DecUnitAbilityLevel(target, id);
+        }
+
+        /// <summary>
+        /// Silence a single target
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="duration">How long should it last</param>
+        public static void Silence(unit target, float duration)
+        {
+            unit dummy = DummySystem.GetDummy();
+
+            SetUnitX(dummy, GetUnitX(target));
+            SetUnitY(dummy, GetUnitY(target));
+            UnitAddAbility(dummy, AbilityId.Silence);
+            ModifyDuration(dummy, AbilityId.Silence, BlzGetUnitAbility(dummy, AbilityId.Silence), duration);
+            IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, target);
+            DummySystem.RecycleDummy(dummy, 0f);
+        }
+
+        /// <summary>
+        /// Silence an entire unit group
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="duration">How long should it last</param>
+        public static void Silence(group target, float duration)
+        {
+            int size = BlzGroupGetSize(target);
+            if (size == 0) return;
+
+            unit curr; // current loops unit
+            while (size > 0)
+            {
+                curr = BlzGroupUnitAt(target, 0);
+                if (curr != null && UnitAlive(curr))
+                {
+                    unit dummy = DummySystem.GetDummy();
+                    SetUnitX(dummy, GetUnitX(curr));
+                    SetUnitY(dummy, GetUnitY(curr));
+                    UnitAddAbility(dummy, AbilityId.Silence);
+                    ModifyDuration(dummy, AbilityId.Silence, BlzGetUnitAbility(dummy, AbilityId.Silence), duration);
+                    IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, curr);
+                    DummySystem.RecycleDummy(dummy, 0f);
+                }
+
+                size--;
+            }
+        }
+
+        /// <summary>
+        /// AOE silence at given position
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="radius"></param>
+        /// <param name="duration">How long should it last</param>
+        public static void Silence(float x, float y, float radius, float duration)
+        {
+            GroupClear(g);
+            GroupEnumUnitsInRange(g, x, y, radius, null);
+            Silence(g, duration);
+        }
+
+        /// <summary>
+        /// Stun a given unit for x seconds
+        /// </summary>
+        /// <param name="target">Stun target</param>
+        /// <param name="duration">How long should it last</param>
+        public static void Stun(unit target, float duration)
+        {
+            unit dummy = DummySystem.GetDummy();
+
+            SetUnitX(dummy, GetUnitX(target));
+            SetUnitY(dummy, GetUnitY(target));
+            UnitAddAbility(dummy, AbilityId.Stun);
+            ModifyDuration(dummy, AbilityId.Stun, BlzGetUnitAbility(dummy, AbilityId.Stun), duration);
+            IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, target);
+            DummySystem.RecycleDummy(dummy, 0f);
+        }
+
+        /// <summary>
+        /// Stun all unit in a group for x seconds
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="duration">How long should it last</param>
+        public static void Stun(group target, float duration)
+        {
+            int size = BlzGroupGetSize(target);
+            if (size == 0) return;
+
+            unit curr; // current loops unit
+            while (size > 0)
+            {
+                curr = BlzGroupUnitAt(target, 0);
+                if (curr != null && UnitAlive(curr))
+                {
+                    unit dummy = DummySystem.GetDummy();
+                    SetUnitX(dummy, GetUnitX(curr));
+                    SetUnitY(dummy, GetUnitY(curr));
+                    UnitAddAbility(dummy, AbilityId.Stun);
+                    ModifyDuration(dummy, AbilityId.Stun, BlzGetUnitAbility(dummy, AbilityId.Stun), duration);
+                    IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, curr);
+                    DummySystem.RecycleDummy(dummy, 0f);
+                }
+
+                size--;
+            }
+        }
+
+        /// <summary>
+        /// Stun any unit in a range
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="radius"></param>
+        /// <param name="duration">How long should it last</param>
+        public static void Stun(float x, float y, float radius, float duration)
+        {
+            GroupClear(g);
+            GroupEnumUnitsInRange(g, x, y, radius, null);
+            Stun(g, duration);
+        }
     }
 }

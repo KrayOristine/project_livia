@@ -1,7 +1,10 @@
-﻿using Source.Shared;
+﻿using Source.Library;
+using Source.Modules;
+using Source.Shared;
 using Source.Trigger;
 using System;
 using WCSharp.Events;
+using WCSharp.Missiles;
 using WCSharp.Sync;
 using static War3Api.Common;
 
@@ -22,6 +25,37 @@ namespace Source
             });
         }
 
+        private static void TryInit(Action method)
+        {
+            try
+            {
+                method.Invoke();
+            } catch (Exception ex)
+            {
+                Logger.Error("Initialization", ex.ToString());
+            }
+        }
+
+        private static void InitShared()
+        {
+            MissileSystem.RegisterForOwnershipChanges();
+        }
+
+        private static void InitModules()
+        {
+            // To add
+        }
+
+        private static void InitLibrary()
+        {
+            Mouse.Init();
+        }
+
+        private static void InitTrigger()
+        {
+            DamageTag.Init();
+        }
+
         private static void Start()
         {
             try
@@ -40,48 +74,12 @@ namespace Source
                 CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
 
 #endif
-                try
-                {
-                    // Initialize core property (because they will be shared for other scripts and they don't require any other than themselves)
+                TryInit(InitShared);
+                TryInit(InitModules);
+                TryInit(InitLibrary);
+                TryInit(InitTrigger);
 
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Init Engine", ex.Message);
-                }
-
-                try
-                {
-                    // Modules Init (these will be used though-out other scripts)
-
-                    //Damage.Init()
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Init Engine", ex.Message);
-                }
-
-                try
-                {
-                    // Library Init (these will be used for trigger like line-segment, etc.
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Init Engine", ex.Message);
-                }
-
-                try
-                {
-                    // Trigger Init
-
-                    DamageTags.Init();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error("Init Engine", ex.Message);
-                }
-
-                Logger.Debug("Init Engine", "Init completed");
+                Logger.Debug("Initialization", "Init completed");
             }
             catch (Exception ex)
             {
