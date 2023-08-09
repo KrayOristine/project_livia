@@ -1,144 +1,24 @@
-﻿using Source.Shared;
+﻿// Ignore Spelling: atktype dmgtype
+
+using Source.Shared;
 using System;
 using System.Collections.Generic;
 using static War3Api.Blizzard;
 using static War3Api.Common;
 
-/*
-	WC3Sharp Damage Engine by Ozzzzymaniac
-	Original version by BribeFromTheHive
-
-	Current Version: 1.0
- */
-
-namespace Source.Modules
+namespace Source.GameSystem.Damage
 {
-    public enum DamageType
-    {
-        None,
-        Physical,
-        Magical,
-        Pure, // Bypass armor damage reduction
-        Evasion, // Set damage to 0
-        Critical, // Dealt extra damage
-        Heal, // Is heal
-        Shield, // Negated by shield
-
-        // System flags
-
-        Spell, // Came from abilities that not specify damage type by default
-        Periodic, // Came from damage over times
-        Item, // Came from items
-        AOE, // Is an AOE damage
-
-        // Engine Flags
-
-        RAW, // Bypass all modification except the engine it self
-        INTERNAL // Ignore the engine modification
-    }
-
-    public struct DamageInstance
-    {
-        private unit source;
-        private unit target;
-        public int SourceType;
-        public int TargetType;
-        public player SourcePlayer;
-        public player TargetPlayer;
-        public float Damage;
-        public bool IsAttack;
-        public bool IsRanged;
-        public bool[] Flags;
-        public attacktype AttackType;
-        public damagetype DamageType;
-        public weapontype WeaponType;
-        public readonly float prevAmt;
-        public readonly attacktype PrevAttackType;
-        public readonly damagetype PrevDamageType;
-        public readonly weapontype PrevWeaponType;
-        internal DamageTrigger? recursive;
-
-        public unit Source
-        {
-            get => source; set
-            {
-                source = value;
-                SourceType = GetUnitTypeId(value);
-                SourcePlayer = GetOwningPlayer(value);
-            }
-        }
-
-        public unit Target
-        {
-            get => target; set
-            {
-                target = value;
-                TargetType = GetUnitTypeId(value);
-                TargetPlayer = GetOwningPlayer(value);
-            }
-        }
-
-        public DamageInstance(unit src, unit tgt, float dmg, bool iatk, bool irgd, attacktype tatk, damagetype tdmg, weapontype twpn)
-        {
-            source = src;
-            target = tgt;
-            SourceType = GetUnitTypeId(src);
-            TargetType = GetUnitTypeId(tgt);
-            SourcePlayer = GetOwningPlayer(src);
-            TargetPlayer = GetOwningPlayer(tgt);
-            Damage = dmg;
-            AttackType = tatk;
-            DamageType = tdmg;
-            WeaponType = twpn;
-            IsAttack = iatk;
-            IsRanged = irgd;
-            Flags = new bool[(int)Modules.DamageType.INTERNAL];
-            Array.Fill(Flags, false);
-            prevAmt = dmg;
-            PrevAttackType = tatk;
-            PrevDamageType = tdmg;
-            PrevWeaponType = twpn;
-            recursive = null;
-        }
-    }
-
-    public struct DamageTrigger
-    {
-        public Action trig;
-        public bool isFrozen;
-        public bool isInception;
-        public int sleepDepth;
-        public int weight;
-        public int minAOE;
-
-        public DamageTrigger(Action func, int priority)
-        {
-            trig = func;
-            weight = priority;
-            isFrozen = false;
-            isInception = false;
-            sleepDepth = 0;
-            minAOE = 1;
-        }
-    }
-
-    public enum DamageEvent
-    {
-        DAMAGE, // Upon the damage first run
-        ARMOR, // Armor event run
-        DAMAGED,
-        AFTER,
-        SOURCE,
-        LETHAL
-    }
-
-    public static class Damage
+    /// <summary>
+    /// The damage Engine, without it nothing will work
+    /// </summary>
+    public static class Engine
     {
         internal static readonly int LIMBO_DEPTH = 8; // Maximum amount of times the engine itself can dream
         internal static readonly float DEATH_DOOR = 0.405f; // If blizzard decided to change this, it should be a simple fix here
 
         // Declare all used variables of the engine
         private static readonly trigger t1 = CreateTrigger();
+
         private static readonly trigger t2 = CreateTrigger();
         private static readonly trigger t3 = CreateTrigger();
         private static readonly timer alarm = CreateTimer();
@@ -157,49 +37,47 @@ namespace Source.Modules
 
         private static readonly bool[] attackImmune = {
             false, // ATTACK_TYPE_NORMAL
-			true, // ATTACK_TYPE_MELEE
-			true, // ATTACK_TYPE_PIERCE
-			true, // ATTACK_TYPE_SIEGE
-			false, // ATTACK_TYPE_MAGIC
-			true, // ATTACK_TYPE_CHAOS
-			true, // ATTACK_TYPE_HERO
-		};
+            true, // ATTACK_TYPE_MELEE
+            true, // ATTACK_TYPE_PIERCE
+            true, // ATTACK_TYPE_SIEGE
+            false, // ATTACK_TYPE_MAGIC
+            true, // ATTACK_TYPE_CHAOS
+            true, // ATTACK_TYPE_HERO
+        };
 
         private static readonly bool[] damageImmune = {
             true, // DAMAGE_TYPE_UNKNOWN
-			false, // NONE
-			false, // NONE
-			false, // NONE
-			true, // DAMAGE_TYPE_NORMAL
-			true, // DAMAGE_TYPE_ENHANCED
-			false, // NONE
-			false, // NONE
-			false, // DAMAGE_TYPE_FIRE
-			false, // DAMAGE_TYPE_COLD
-			false, // DAMAGE_TYPE_LIGHTNING
-			true, // DAMAGE_TYPE_POISON
-			true, // DAMAGE_TYPE_DISEASE
-			false, // DAMAGE_TYPE_DIVINE
-			false, // DAMAGE_TYPE_MAGIC
-			false, // DAMAGE_TYPE_SONIC
-			true, // DAMAGE_TYPE_ACID
-			false, // DAMAGE_TYPE_FORCE
-			false, // DAMAGE_TYPE_DEATH
-			false, // DAMAGE_TYPE_MIND
-			false, // DAMAGE_TYPE_PLANT
-			false, // DAMAGE_TYPE_DEFENSIVE
-			true, // DAMAGE_TYPE_DEMOLITION
-			true, // DAMAGE_TYPE_SLOW_POISON
-			false, // DAMAGE_TYPE_SPIRIT_LINK
-			false, // DAMAGE_TYPE_SHADOW_STRIKE
-			true, // DAMAGE_TYPE_UNIVERSAL
-		};
+            false, // NONE
+            false, // NONE
+            false, // NONE
+            true, // DAMAGE_TYPE_NORMAL
+            true, // DAMAGE_TYPE_ENHANCED
+            false, // NONE
+            false, // NONE
+            false, // DAMAGE_TYPE_FIRE
+            false, // DAMAGE_TYPE_COLD
+            false, // DAMAGE_TYPE_LIGHTNING
+            true, // DAMAGE_TYPE_POISON
+            true, // DAMAGE_TYPE_DISEASE
+            false, // DAMAGE_TYPE_DIVINE
+            false, // DAMAGE_TYPE_MAGIC
+            false, // DAMAGE_TYPE_SONIC
+            true, // DAMAGE_TYPE_ACID
+            false, // DAMAGE_TYPE_FORCE
+            false, // DAMAGE_TYPE_DEATH
+            false, // DAMAGE_TYPE_MIND
+            false, // DAMAGE_TYPE_PLANT
+            false, // DAMAGE_TYPE_DEFENSIVE
+            true, // DAMAGE_TYPE_DEMOLITION
+            true, // DAMAGE_TYPE_SLOW_POISON
+            false, // DAMAGE_TYPE_SPIRIT_LINK
+            false, // DAMAGE_TYPE_SHADOW_STRIKE
+            true, // DAMAGE_TYPE_UNIVERSAL
+        };
 
         private static DamageTrigger userIndex;
         private static DamageInstance current;
-        private static bool isCurrent = false;
         private static DamageInstance lastInstance;
-        private static bool isLastInstance = false;
         private static bool skipEngine = false;
         private static readonly List<DamageInstance> recursiveStacks = new();
         private static readonly Dictionary<unit, bool> recursiveSource = new();
@@ -211,10 +89,27 @@ namespace Source.Modules
             get => current;
         }
 
+        private static bool IsLastInstance { get => !lastInstance.IsEmpty; set
+            {
+                if (!value)
+                {
+                    DamageInstance.Recycle(lastInstance);
+                }
+            }
+        }
+        private static bool IsCurrent { get => !current.IsEmpty; set
+            {
+                if (!value)
+                {
+                    DamageInstance.Recycle(current);
+                }
+            }
+        }
+
         public static float Life { get; set; } = 0.0f;
         public static int SourceStacks { get => sourceStacks; }
 
-        private static DamageType nextType = DamageType.None;
+        public static DamageTypes NextType { get; set; }
 
         private static readonly LinkedList<DamageTrigger>[] eventList =
         {
@@ -229,7 +124,15 @@ namespace Source.Modules
         private static bool hasSource = false;
         private static bool hasLethal = false;
 
-        public static LinkedListNode<DamageTrigger>? Register(DamageEvent whichEvent, int priority, Action callback)
+        /// <summary>
+        /// Register an Action that will be executed on specific event<br/>
+        /// See <see cref="DamageEvent"/> list to see which event is available
+        /// </summary>
+        /// <param name="whichEvent">Event that trigger the Action</param>
+        /// <param name="priority">Higher number run last, lower run first</param>
+        /// <param name="callback">Action that will be triggered every time the event happen</param>
+        /// <returns>A node that the Trigger is registered at!, required to be removed</returns>
+        public static LinkedListNode<DamageTrigger> Register(DamageEvent whichEvent, int priority, Action callback)
         {
             var head = eventList[(int)whichEvent];
             if ((int)whichEvent >= (int)DamageEvent.SOURCE)
@@ -238,7 +141,7 @@ namespace Source.Modules
                 hasLethal = hasLethal || whichEvent == DamageEvent.LETHAL;
             }
 
-            var data = new DamageTrigger(callback, priority);
+            var data = DamageTrigger.Create(callback, priority);
             if (head.First == null) return head.AddFirst(data);
 
             var node = head.First;
@@ -251,6 +154,10 @@ namespace Source.Modules
             return head.AddAfter(node, data);
         }
 
+        /// <summary>
+        /// Remove the damage trigger node
+        /// </summary>
+        /// <param name="node"></param>
         public static void Remove(LinkedListNode<DamageTrigger> node)
         {
             var head = node.List;
@@ -263,6 +170,36 @@ namespace Source.Modules
             }
 
             head.Remove(node);
+            node.Value.Recycle();
+        }
+
+        /// <summary>
+        /// Remove the specific trigger at specific event
+        /// </summary>
+        /// <param name="trig">The trigger to remove</param>
+        /// <param name="whichEvent">The event to find the trigger</param>
+        public static void Remove(DamageTrigger trig, DamageEvent whichEvent)
+        {
+            var head = eventList[(int)whichEvent];
+            if (head == null) return; // Some how the event was invalid
+
+            var node = head.Find(trig);
+            if (node == null) return; // No node found
+
+            if (head.Count - 1 == 0)
+            {
+                if (whichEvent == DamageEvent.SOURCE)
+                {
+                    hasSource = false;
+                }
+                else if (whichEvent == DamageEvent.LETHAL)
+                {
+                    hasLethal = false;
+                }
+            }
+
+            head.Remove(node);
+            node.Value.Recycle();
         }
 
         public static void Enable(bool flags)
@@ -288,29 +225,29 @@ namespace Source.Modules
 
         private static readonly Func<bool>[] breakChecks =
         {
-            () => current.Flags[(int)DamageType.Pure] || skipEngine || current.Flags[(int)DamageType.INTERNAL],
-            () => current.Damage <= 0 || current.Flags[(int)DamageType.INTERNAL],
-            () => current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int)DamageType.INTERNAL],
-            () => current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int) DamageType.INTERNAL],
-            () => current.Flags[(int)DamageType.INTERNAL],
-            () => current.Flags[(int)DamageType.INTERNAL]
+            () => current != null && (current.Flags[(int)DamageTypes.Pure] || skipEngine || current.Flags[(int)DamageTypes.INTERNAL]),
+            () => current != null && (current.Damage <= 0 || current.Flags[(int)DamageTypes.INTERNAL]),
+            () => current != null && (current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int)DamageTypes.INTERNAL]),
+            () => current != null && (current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int) DamageTypes.INTERNAL]),
+            () => current != null && (current.Flags[(int)DamageTypes.INTERNAL]),
+            () => current != null && (current.Flags[(int)DamageTypes.INTERNAL])
         };
 
         private static void RunEvent(DamageEvent whichEvent)
         {
             var head = eventList[(int)whichEvent];
             var checks = breakChecks[(int)whichEvent];
+            Logger.Debug("Damage Engine", $"RunEvent is running for {whichEvent}");
             if (dreaming || checks.Invoke() || head.First == null) return;
-
             var node = head.First;
             userIndex = node.Value;
-            Damage.Enable(false);
+            Enable(false);
             EnableTrigger(t3);
             dreaming = true;
 
             while (true)
             {
-                if (!userIndex.isFrozen && !hasSource || (whichEvent != DamageEvent.SOURCE || sourceAOE > userIndex.minAOE))
+                if (!userIndex.isFrozen && !hasSource || whichEvent != DamageEvent.SOURCE || sourceAOE > userIndex.minAOE)
                 {
                     try
                     {
@@ -321,27 +258,26 @@ namespace Source.Modules
                         Console.WriteLine(ex.ToString());
                     }
                 }
-                if (node.Next == null) break;
 
+                if (node.Next == null) break;
                 node = node.Next;
                 userIndex = node.Value;
             }
 
             dreaming = false;
-            Damage.Enable(true);
+            Enable(true);
             DisableTrigger(t3);
         }
 
         private static DamageInstance Create(unit src, unit tgt, float dmg, bool iatk, bool irgd, attacktype tatk, damagetype tdmg, weapontype twpn)
         {
-            var d = new DamageInstance(src, tgt, dmg, iatk, irgd, tatk, tdmg, twpn);
+            var d = DamageInstance.Create(src, tgt, dmg, iatk, irgd, tatk, tdmg, twpn);
 
-            d.Flags[(int)DamageType.Spell] = (tatk == ATTACK_TYPE_NORMAL && !iatk);
-            d.Flags[(int)DamageType.Physical] = iatk;
-            if (nextType != DamageType.None)
+            d.Flags[(int)DamageTypes.Spell] = tatk == ATTACK_TYPE_NORMAL && !iatk;
+            d.Flags[(int)DamageTypes.Physical] = iatk;
+            if (NextType != DamageTypes.None)
             {
-                d.Flags[(int)nextType] = true;
-                nextType = DamageType.None;
+                d.Flags[(int)NextType] = true;
             }
             return d;
         }
@@ -374,38 +310,30 @@ namespace Source.Modules
 
         private static void AfterDamage()
         {
-            if (isCurrent)
+            if (IsCurrent)
             {
                 RunEvent(DamageEvent.AFTER);
-                isCurrent = false;
+                IsCurrent = false;
             }
             skipEngine = false;
         }
 
         private static bool DoPreEvent(DamageInstance d, bool isNatural)
         {
-            try
+            current = d;
+            recursiveSource[d.Source] = true;
+            recursiveTarget[d.Target] = true;
+            if (d.Damage == 0.0f) return false;
+            skipEngine = d.DamageType == DAMAGE_TYPE_UNKNOWN || d.Flags[(int)DamageTypes.INTERNAL];
+            RunEvent(DamageEvent.DAMAGE);
+            if (isNatural)
             {
-                current = d;
-                recursiveSource.Add(d.Source, true);
-                recursiveTarget.Add(d.Target, true);
-                if (d.Damage == 0.0f) return false;
-                skipEngine = d.DamageType == DAMAGE_TYPE_UNKNOWN || d.Flags[(int)DamageType.INTERNAL];
-                RunEvent(DamageEvent.DAMAGE);
-                if (isNatural)
-                {
-                    BlzSetEventAttackType(d.AttackType);
-                    BlzSetEventDamageType(d.DamageType);
-                    BlzSetEventWeaponType(d.WeaponType);
-                    BlzSetEventDamage(d.Damage);
-                }
-                return true;
+                BlzSetEventAttackType(d.AttackType);
+                BlzSetEventDamageType(d.DamageType);
+                BlzSetEventWeaponType(d.WeaponType);
+                BlzSetEventDamage(d.Damage);
             }
-            catch (Exception ex)
-            {
-                Logger.Error("Damage Engine", "DoPreEvent - " + ex.Message);
-                return false;
-            }
+            return true;
         }
 
         private static void FailsafeClear()
@@ -425,7 +353,7 @@ namespace Source.Modules
                 eventRuns = false;
                 AfterDamage();
             }
-            isCurrent = false;
+            IsCurrent = false;
             skipEngine = false;
             if (!canKick && kicking) return;
             if (recursiveStacks.Count > 0)
@@ -463,15 +391,15 @@ namespace Source.Modules
 
                 for (i = 0; i < recursiveStacks.Count; i++)
                 {
-                    if (recursiveStacks[i].recursive != null)
-                    {
-                        DamageTrigger rs = (DamageTrigger)recursiveStacks[i].recursive;
-                        rs.isFrozen = false;
-                        rs.sleepDepth = 0;
-                    }
+                    DamageTrigger? recursive = recursiveStacks[i].recursive;
+                    if (recursive == null) continue;
+
+                    recursive.isFrozen = false;
+                    recursive.sleepDepth = 0;
                 }
+
+                recursiveStacks.Clear();
             }
-            recursiveStacks.Clear();
             dreamDepth = 0;
             kicking = false;
             dreaming = false;
@@ -500,7 +428,7 @@ namespace Source.Modules
         public static DamageInstance ApplyMagic(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, dmgtype);
-            d.Flags[(int)DamageType.Magical] = true;
+            d.Flags[(int)DamageTypes.Magical] = true;
 
             return d;
         }
@@ -508,7 +436,7 @@ namespace Source.Modules
         public static DamageInstance ApplyPhysical(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, dmgtype);
-            d.Flags[(int)DamageType.Physical] = true;
+            d.Flags[(int)DamageTypes.Physical] = true;
 
             return d;
         }
@@ -516,7 +444,7 @@ namespace Source.Modules
         public static DamageInstance ApplyPure(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, DAMAGE_TYPE_UNIVERSAL);
-            d.Flags[(int)DamageType.Pure] = true;
+            d.Flags[(int)DamageTypes.Pure] = true;
 
             return d;
         }
@@ -529,28 +457,24 @@ namespace Source.Modules
         // Using this to avoid creating the same function ref
         private static void AlarmExec()
         {
-            try
+            alarmSet = false;
+            dreaming = false;
+            Enable(true);
+            if (totem)
             {
-                alarmSet = false;
-                dreaming = false;
-                Enable(true);
-                if (totem) { FailsafeClear(); }
-                else
-                {
-                    canKick = true;
-                    kicking = false;
-                    Finish();
-                }
-                AOEEnd();
-                isCurrent = false;
+                FailsafeClear();
             }
-            catch (Exception ex)
+            else
             {
-                Logger.Error("Damage Engine", "AlarmExec - " + ex.Message);
+                canKick = true;
+                kicking = false;
+                Finish();
             }
+            AOEEnd();
+            IsCurrent = false;
         }
 
-        private static bool OnDamaging()
+        private static void OnDamaging()
         {
             try
             {
@@ -565,7 +489,7 @@ namespace Source.Modules
                             case 21:
                             case 24:
                                 lastInstance = current;
-                                isLastInstance = true;
+                                IsLastInstance = true;
                                 totem = false;
                                 canKick = false;
                                 break;
@@ -594,25 +518,22 @@ namespace Source.Modules
                     orgTarget = d.Target;
                 }
 
-                targets.Add(d.Target, true);
+                targets[d.Target] = true;
                 if (DoPreEvent(d, true))
                 {
                     canKick = true;
                     Finish();
                 }
 
-                totem = !isLastInstance || attackImmune[GetHandleId(d.AttackType)] || damageImmune[GetHandleId(d.DamageType)] || !IsUnitType(d.Target, UNIT_TYPE_MAGIC_IMMUNE);
-
-                return false;
+                totem = !IsLastInstance || attackImmune[GetHandleId(d.AttackType)] || damageImmune[GetHandleId(d.DamageType)] || !IsUnitType(d.Target, UNIT_TYPE_MAGIC_IMMUNE);
             }
             catch (Exception ex)
             {
                 Logger.Error("Damage Engine", ex.Message);
-                return false;
             }
         }
 
-        private static bool OnDamaged()
+        private static void OnDamaged()
         {
             try
             {
@@ -620,14 +541,14 @@ namespace Source.Modules
                 var d = current;
 
                 if (prep) prep = false;
-                else if (dreaming || d.prevAmt == 0) return false;
+                else if (dreaming || d.PrevAmt == 0) return;
                 else if (totem) totem = false;
                 else
                 {
                     AfterDamage();
                     d = lastInstance;
                     current = d;
-                    isLastInstance = false;
+                    IsLastInstance = false;
                     canKick = true;
                 }
 
@@ -650,17 +571,14 @@ namespace Source.Modules
                 BlzSetEventDamage(d.Damage);
                 eventRuns = true;
                 if (d.Damage == 0) Finish();
-
-                return false;
             }
             catch (Exception ex)
             {
                 Logger.Error("Damage Engine", ex.Message);
-                return false;
             }
         }
 
-        public static bool OnRecursive()
+        public static void OnRecursive()
         {
             try
             {
@@ -671,10 +589,9 @@ namespace Source.Modules
             {
                 Logger.Error("Damage Engine", ex.Message);
             }
-            return false;
         }
 
-        public static int Init()
+        public static bool InitEngine()
         {
             for (int i = 0; i <= bj_MAX_PLAYERS; i++)
             {
@@ -684,15 +601,13 @@ namespace Source.Modules
                 TriggerRegisterPlayerUnitEvent(t3, p, EVENT_PLAYER_UNIT_DAMAGING, null);
             }
 
-            TriggerAddCondition(t1, Condition(OnDamaging));
-            TriggerAddCondition(t2, Condition(OnDamaged));
-            TriggerAddCondition(t3, Condition(OnRecursive));
+            TriggerAddAction(t1, OnDamaging);
+            TriggerAddAction(t2, OnDamaged);
+            TriggerAddAction(t3, OnRecursive);
             DisableTrigger(t3);
 
-            return 0;
+            return true;
         }
 
-        // Just a magic, don't care this
-        static internal int doInit = Init();
     };
 }

@@ -59,6 +59,9 @@ csharp_style_var_for_built_in_types = false:silent
 csharp_style_var_when_type_is_apparent = false:silent
 csharp_style_var_elsewhere = false:silent
 
+# S2344: Enumeration type names should not have "Flags" or "Enum" suffixes
+dotnet_diagnostic.S2344.severity = none
+
 [*.{cs,vb}]
 #### Naming styles ####
 

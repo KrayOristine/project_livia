@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Source.Library
+namespace Source.Shared
 {
     /*
      * Obscured Types

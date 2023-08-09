@@ -9,10 +9,10 @@ namespace Source.Shared
         /// @CSharpLua.Template = "BlzGetHeroPrimaryStat({0})"
         public static extern int BlzGetHeroPrimaryStat(Common.unit u);
 
-        /// @CSharpLua.Template = "BlzSetHeroStatEx({0})"
+        /// @CSharpLua.Template = "BlzSetHeroStatEx({0}, {1}, {2})"
         public static extern void BlzSetHeroStatEx(Common.unit u, int i, int amt);
 
-        /// @CSharpLua.Template = "BlzGetHeroStat({0})"
+        /// @CSharpLua.Template = "BlzGetHeroStat({0}, {1})"
         public static extern int BlzGetHeroStat(Common.unit u, int i);
 #pragma warning restore S4200
 #pragma warning restore CS0626

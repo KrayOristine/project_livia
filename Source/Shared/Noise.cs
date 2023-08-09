@@ -51,9 +51,9 @@ using System;
 using System.Runtime.CompilerServices;
 
 // Switch between using floats or doubles for input position
-using FNLfloat = System.Double;
+using FNLfloat = System.Single;
 
-namespace Source.Modules
+namespace Source.Shared
 {
 
     public class FastNoiseLite
@@ -561,8 +561,8 @@ namespace Source.Modules
         [MethodImpl(INLINE)]
         private static float CubicLerp(float a, float b, float c, float d, float t)
         {
-            float p = (d - c) - (a - b);
-            return t * t * t * p + t * t * ((a - b) - p) + t * (c - a) + b;
+            float p = d - c - (a - b);
+            return t * t * t * p + t * t * (a - b - p) + t * (c - a) + b;
         }
 
         [MethodImpl(INLINE)]
@@ -658,7 +658,7 @@ namespace Source.Modules
         [MethodImpl(INLINE)]
         private static void GradCoordOut(int seed, int xPrimed, int yPrimed, out float xo, out float yo)
         {
-            int hash = Hash(seed, xPrimed, yPrimed) & (255 << 1);
+            int hash = Hash(seed, xPrimed, yPrimed) & 255 << 1;
 
             xo = RandVecs2D[hash];
             yo = RandVecs2D[hash | 1];
@@ -667,7 +667,7 @@ namespace Source.Modules
         [MethodImpl(INLINE)]
         private static void GradCoordOut(int seed, int xPrimed, int yPrimed, int zPrimed, out float xo, out float yo, out float zo)
         {
-            int hash = Hash(seed, xPrimed, yPrimed, zPrimed) & (255 << 2);
+            int hash = Hash(seed, xPrimed, yPrimed, zPrimed) & 255 << 2;
 
             xo = RandVecs3D[hash];
             yo = RandVecs3D[hash | 1];
@@ -678,8 +678,8 @@ namespace Source.Modules
         private static void GradCoordDual(int seed, int xPrimed, int yPrimed, float xd, float yd, out float xo, out float yo)
         {
             int hash = Hash(seed, xPrimed, yPrimed);
-            int index1 = hash & (127 << 1);
-            int index2 = (hash >> 7) & (255 << 1);
+            int index1 = hash & 127 << 1;
+            int index2 = hash >> 7 & 255 << 1;
 
             float xg = Gradients2D[index1];
             float yg = Gradients2D[index1 | 1];
@@ -696,8 +696,8 @@ namespace Source.Modules
         private static void GradCoordDual(int seed, int xPrimed, int yPrimed, int zPrimed, float xd, float yd, float zd, out float xo, out float yo, out float zo)
         {
             int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
-            int index1 = hash & (63 << 2);
-            int index2 = (hash >> 6) & (255 << 2);
+            int index1 = hash & 63 << 2;
+            int index2 = hash >> 6 & 255 << 2;
 
             float xg = Gradients3D[index1];
             float yg = Gradients3D[index1 | 1];
@@ -1104,7 +1104,7 @@ namespace Source.Modules
             if (a <= 0) n0 = 0;
             else
             {
-                n0 = (a * a) * (a * a) * GradCoord(seed, i, j, x0, y0);
+                n0 = a * a * (a * a) * GradCoord(seed, i, j, x0, y0);
             }
 
             float c = (float)(2 * (1 - 2 * G2) * (1 / G2 - 2)) * t + ((float)(-2 * (1 - 2 * G2) * (1 - 2 * G2)) + a);
@@ -1113,7 +1113,7 @@ namespace Source.Modules
             {
                 float x2 = x0 + (2 * (float)G2 - 1);
                 float y2 = y0 + (2 * (float)G2 - 1);
-                n2 = (c * c) * (c * c) * GradCoord(seed, i + PrimeX, j + PrimeY, x2, y2);
+                n2 = c * c * (c * c) * GradCoord(seed, i + PrimeX, j + PrimeY, x2, y2);
             }
 
             if (y0 > x0)
@@ -1124,7 +1124,7 @@ namespace Source.Modules
                 if (b <= 0) n1 = 0;
                 else
                 {
-                    n1 = (b * b) * (b * b) * GradCoord(seed, i, j + PrimeY, x1, y1);
+                    n1 = b * b * (b * b) * GradCoord(seed, i, j + PrimeY, x1, y1);
                 }
             }
             else
@@ -1135,7 +1135,7 @@ namespace Source.Modules
                 if (b <= 0) n1 = 0;
                 else
                 {
-                    n1 = (b * b) * (b * b) * GradCoord(seed, i + PrimeX, j, x1, y1);
+                    n1 = b * b * (b * b) * GradCoord(seed, i + PrimeX, j, x1, y1);
                 }
             }
 
@@ -1173,13 +1173,13 @@ namespace Source.Modules
             k *= PrimeZ;
 
             float value = 0;
-            float a = (0.6f - x0 * x0) - (y0 * y0 + z0 * z0);
+            float a = 0.6f - x0 * x0 - (y0 * y0 + z0 * z0);
 
             for (int l = 0; ; l++)
             {
                 if (a > 0)
                 {
-                    value += (a * a) * (a * a) * GradCoord(seed, i, j, k, x0, y0, z0);
+                    value += a * a * (a * a) * GradCoord(seed, i, j, k, x0, y0, z0);
                 }
 
                 if (ax0 >= ay0 && ax0 >= az0)
@@ -1188,7 +1188,7 @@ namespace Source.Modules
                     if (b > 1)
                     {
                         b -= 1;
-                        value += (b * b) * (b * b) * GradCoord(seed, i - xNSign * PrimeX, j, k, x0 + xNSign, y0, z0);
+                        value += b * b * (b * b) * GradCoord(seed, i - xNSign * PrimeX, j, k, x0 + xNSign, y0, z0);
                     }
                 }
                 else if (ay0 > ax0 && ay0 >= az0)
@@ -1197,7 +1197,7 @@ namespace Source.Modules
                     if (b > 1)
                     {
                         b -= 1;
-                        value += (b * b) * (b * b) * GradCoord(seed, i, j - yNSign * PrimeY, k, x0, y0 + yNSign, z0);
+                        value += b * b * (b * b) * GradCoord(seed, i, j - yNSign * PrimeY, k, x0, y0 + yNSign, z0);
                     }
                 }
                 else
@@ -1206,7 +1206,7 @@ namespace Source.Modules
                     if (b > 1)
                     {
                         b -= 1;
-                        value += (b * b) * (b * b) * GradCoord(seed, i, j, k - zNSign * PrimeZ, x0, y0, z0 + zNSign);
+                        value += b * b * (b * b) * GradCoord(seed, i, j, k - zNSign * PrimeZ, x0, y0, z0 + zNSign);
                     }
                 }
 
@@ -1220,11 +1220,11 @@ namespace Source.Modules
                 y0 = yNSign * ay0;
                 z0 = zNSign * az0;
 
-                a += (0.75f - ax0) - (ay0 + az0);
+                a += 0.75f - ax0 - (ay0 + az0);
 
-                i += (xNSign >> 1) & PrimeX;
-                j += (yNSign >> 1) & PrimeY;
-                k += (zNSign >> 1) & PrimeZ;
+                i += xNSign >> 1 & PrimeX;
+                j += yNSign >> 1 & PrimeY;
+                k += zNSign >> 1 & PrimeZ;
 
                 xNSign = -xNSign;
                 yNSign = -yNSign;
@@ -1267,13 +1267,13 @@ namespace Source.Modules
             float x0 = xi - t;
             float y0 = yi - t;
 
-            float a0 = (2.0f / 3.0f) - x0 * x0 - y0 * y0;
-            float value = (a0 * a0) * (a0 * a0) * GradCoord(seed, i, j, x0, y0);
+            float a0 = 2.0f / 3.0f - x0 * x0 - y0 * y0;
+            float value = a0 * a0 * (a0 * a0) * GradCoord(seed, i, j, x0, y0);
 
             float a1 = (float)(2 * (1 - 2 * G2) * (1 / G2 - 2)) * t + ((float)(-2 * (1 - 2 * G2) * (1 - 2 * G2)) + a0);
             float x1 = x0 - (float)(1 - 2 * G2);
             float y1 = y0 - (float)(1 - 2 * G2);
-            value += (a1 * a1) * (a1 * a1) * GradCoord(seed, i1, j1, x1, y1);
+            value += a1 * a1 * (a1 * a1) * GradCoord(seed, i1, j1, x1, y1);
 
             // Nested conditionals were faster than compact bit logic/arithmetic.
             float xmyi = xi - yi;
@@ -1283,20 +1283,20 @@ namespace Source.Modules
                 {
                     float x2 = x0 + (float)(3 * G2 - 2);
                     float y2 = y0 + (float)(3 * G2 - 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i + (PrimeX << 1), j + PrimeY, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i + (PrimeX << 1), j + PrimeY, x2, y2);
                     }
                 }
                 else
                 {
                     float x2 = x0 + (float)G2;
                     float y2 = y0 + (float)(G2 - 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i, j + PrimeY, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i, j + PrimeY, x2, y2);
                     }
                 }
 
@@ -1304,20 +1304,20 @@ namespace Source.Modules
                 {
                     float x3 = x0 + (float)(3 * G2 - 1);
                     float y3 = y0 + (float)(3 * G2 - 2);
-                    float a3 = (2.0f / 3.0f) - x3 * x3 - y3 * y3;
+                    float a3 = 2.0f / 3.0f - x3 * x3 - y3 * y3;
                     if (a3 > 0)
                     {
-                        value += (a3 * a3) * (a3 * a3) * GradCoord(seed, i + PrimeX, j + (PrimeY << 1), x3, y3);
+                        value += a3 * a3 * (a3 * a3) * GradCoord(seed, i + PrimeX, j + (PrimeY << 1), x3, y3);
                     }
                 }
                 else
                 {
                     float x3 = x0 + (float)(G2 - 1);
                     float y3 = y0 + (float)G2;
-                    float a3 = (2.0f / 3.0f) - x3 * x3 - y3 * y3;
+                    float a3 = 2.0f / 3.0f - x3 * x3 - y3 * y3;
                     if (a3 > 0)
                     {
-                        value += (a3 * a3) * (a3 * a3) * GradCoord(seed, i + PrimeX, j, x3, y3);
+                        value += a3 * a3 * (a3 * a3) * GradCoord(seed, i + PrimeX, j, x3, y3);
                     }
                 }
             }
@@ -1327,20 +1327,20 @@ namespace Source.Modules
                 {
                     float x2 = x0 + (float)(1 - G2);
                     float y2 = y0 - (float)G2;
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i - PrimeX, j, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i - PrimeX, j, x2, y2);
                     }
                 }
                 else
                 {
                     float x2 = x0 + (float)(G2 - 1);
                     float y2 = y0 + (float)G2;
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i + PrimeX, j, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i + PrimeX, j, x2, y2);
                     }
                 }
 
@@ -1348,20 +1348,20 @@ namespace Source.Modules
                 {
                     float x2 = x0 - (float)G2;
                     float y2 = y0 - (float)(G2 - 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i, j - PrimeY, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i, j - PrimeY, x2, y2);
                     }
                 }
                 else
                 {
                     float x2 = x0 + (float)G2;
                     float y2 = y0 + (float)(G2 - 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float a2 = 2.0f / 3.0f - x2 * x2 - y2 * y2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * GradCoord(seed, i, j + PrimeY, x2, y2);
+                        value += a2 * a2 * (a2 * a2) * GradCoord(seed, i, j + PrimeY, x2, y2);
                     }
                 }
             }
@@ -1400,14 +1400,14 @@ namespace Source.Modules
             float y0 = yi + yNMask;
             float z0 = zi + zNMask;
             float a0 = 0.75f - x0 * x0 - y0 * y0 - z0 * z0;
-            float value = (a0 * a0) * (a0 * a0) * GradCoord(seed,
+            float value = a0 * a0 * (a0 * a0) * GradCoord(seed,
                 i + (xNMask & PrimeX), j + (yNMask & PrimeY), k + (zNMask & PrimeZ), x0, y0, z0);
 
             float x1 = xi - 0.5f;
             float y1 = yi - 0.5f;
             float z1 = zi - 0.5f;
             float a1 = 0.75f - x1 * x1 - y1 * y1 - z1 * z1;
-            value += (a1 * a1) * (a1 * a1) * GradCoord(seed2,
+            value += a1 * a1 * (a1 * a1) * GradCoord(seed2,
                 i + PrimeX, j + PrimeY, k + PrimeZ, x1, y1, z1);
 
             float xAFlipMask0 = ((xNMask | 1) << 1) * x1;
@@ -1424,7 +1424,7 @@ namespace Source.Modules
                 float x2 = x0 - (xNMask | 1);
                 float y2 = y0;
                 float z2 = z0;
-                value += (a2 * a2) * (a2 * a2) * GradCoord(seed,
+                value += a2 * a2 * (a2 * a2) * GradCoord(seed,
                     i + (~xNMask & PrimeX), j + (yNMask & PrimeY), k + (zNMask & PrimeZ), x2, y2, z2);
             }
             else
@@ -1435,7 +1435,7 @@ namespace Source.Modules
                     float x3 = x0;
                     float y3 = y0 - (yNMask | 1);
                     float z3 = z0 - (zNMask | 1);
-                    value += (a3 * a3) * (a3 * a3) * GradCoord(seed,
+                    value += a3 * a3 * (a3 * a3) * GradCoord(seed,
                         i + (xNMask & PrimeX), j + (~yNMask & PrimeY), k + (~zNMask & PrimeZ), x3, y3, z3);
                 }
 
@@ -1445,8 +1445,8 @@ namespace Source.Modules
                     float x4 = (xNMask | 1) + x1;
                     float y4 = y1;
                     float z4 = z1;
-                    value += (a4 * a4) * (a4 * a4) * GradCoord(seed2,
-                        i + (xNMask & (PrimeX * 2)), j + PrimeY, k + PrimeZ, x4, y4, z4);
+                    value += a4 * a4 * (a4 * a4) * GradCoord(seed2,
+                        i + (xNMask & PrimeX * 2), j + PrimeY, k + PrimeZ, x4, y4, z4);
                     skip5 = true;
                 }
             }
@@ -1458,7 +1458,7 @@ namespace Source.Modules
                 float x6 = x0;
                 float y6 = y0 - (yNMask | 1);
                 float z6 = z0;
-                value += (a6 * a6) * (a6 * a6) * GradCoord(seed,
+                value += a6 * a6 * (a6 * a6) * GradCoord(seed,
                     i + (xNMask & PrimeX), j + (~yNMask & PrimeY), k + (zNMask & PrimeZ), x6, y6, z6);
             }
             else
@@ -1469,7 +1469,7 @@ namespace Source.Modules
                     float x7 = x0 - (xNMask | 1);
                     float y7 = y0;
                     float z7 = z0 - (zNMask | 1);
-                    value += (a7 * a7) * (a7 * a7) * GradCoord(seed,
+                    value += a7 * a7 * (a7 * a7) * GradCoord(seed,
                         i + (~xNMask & PrimeX), j + (yNMask & PrimeY), k + (~zNMask & PrimeZ), x7, y7, z7);
                 }
 
@@ -1479,8 +1479,8 @@ namespace Source.Modules
                     float x8 = x1;
                     float y8 = (yNMask | 1) + y1;
                     float z8 = z1;
-                    value += (a8 * a8) * (a8 * a8) * GradCoord(seed2,
-                        i + PrimeX, j + (yNMask & (PrimeY << 1)), k + PrimeZ, x8, y8, z8);
+                    value += a8 * a8 * (a8 * a8) * GradCoord(seed2,
+                        i + PrimeX, j + (yNMask & PrimeY << 1), k + PrimeZ, x8, y8, z8);
                     skip9 = true;
                 }
             }
@@ -1492,7 +1492,7 @@ namespace Source.Modules
                 float xA = x0;
                 float yA = y0;
                 float zA = z0 - (zNMask | 1);
-                value += (aA * aA) * (aA * aA) * GradCoord(seed,
+                value += aA * aA * (aA * aA) * GradCoord(seed,
                     i + (xNMask & PrimeX), j + (yNMask & PrimeY), k + (~zNMask & PrimeZ), xA, yA, zA);
             }
             else
@@ -1503,7 +1503,7 @@ namespace Source.Modules
                     float xB = x0 - (xNMask | 1);
                     float yB = y0 - (yNMask | 1);
                     float zB = z0;
-                    value += (aB * aB) * (aB * aB) * GradCoord(seed,
+                    value += aB * aB * (aB * aB) * GradCoord(seed,
                         i + (~xNMask & PrimeX), j + (~yNMask & PrimeY), k + (zNMask & PrimeZ), xB, yB, zB);
                 }
 
@@ -1513,8 +1513,8 @@ namespace Source.Modules
                     float xC = x1;
                     float yC = y1;
                     float zC = (zNMask | 1) + z1;
-                    value += (aC * aC) * (aC * aC) * GradCoord(seed2,
-                        i + PrimeX, j + PrimeY, k + (zNMask & (PrimeZ << 1)), xC, yC, zC);
+                    value += aC * aC * (aC * aC) * GradCoord(seed2,
+                        i + PrimeX, j + PrimeY, k + (zNMask & PrimeZ << 1), xC, yC, zC);
                     skipD = true;
                 }
             }
@@ -1527,8 +1527,8 @@ namespace Source.Modules
                     float x5 = x1;
                     float y5 = (yNMask | 1) + y1;
                     float z5 = (zNMask | 1) + z1;
-                    value += (a5 * a5) * (a5 * a5) * GradCoord(seed2,
-                        i + PrimeX, j + (yNMask & (PrimeY << 1)), k + (zNMask & (PrimeZ << 1)), x5, y5, z5);
+                    value += a5 * a5 * (a5 * a5) * GradCoord(seed2,
+                        i + PrimeX, j + (yNMask & PrimeY << 1), k + (zNMask & PrimeZ << 1), x5, y5, z5);
                 }
             }
 
@@ -1540,8 +1540,8 @@ namespace Source.Modules
                     float x9 = (xNMask | 1) + x1;
                     float y9 = y1;
                     float z9 = (zNMask | 1) + z1;
-                    value += (a9 * a9) * (a9 * a9) * GradCoord(seed2,
-                        i + (xNMask & (PrimeX * 2)), j + PrimeY, k + (zNMask & (PrimeZ << 1)), x9, y9, z9);
+                    value += a9 * a9 * (a9 * a9) * GradCoord(seed2,
+                        i + (xNMask & PrimeX * 2), j + PrimeY, k + (zNMask & PrimeZ << 1), x9, y9, z9);
                 }
             }
 
@@ -1553,8 +1553,8 @@ namespace Source.Modules
                     float xD = (xNMask | 1) + x1;
                     float yD = (yNMask | 1) + y1;
                     float zD = z1;
-                    value += (aD * aD) * (aD * aD) * GradCoord(seed2,
-                        i + (xNMask & (PrimeX << 1)), j + (yNMask & (PrimeY << 1)), k + PrimeZ, xD, yD, zD);
+                    value += aD * aD * (aD * aD) * GradCoord(seed2,
+                        i + (xNMask & PrimeX << 1), j + (yNMask & PrimeY << 1), k + PrimeZ, xD, yD, zD);
                 }
             }
 
@@ -1590,7 +1590,7 @@ namespace Source.Modules
                         for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
                             int hash = Hash(seed, xPrimed, yPrimed);
-                            int idx = hash & (255 << 1);
+                            int idx = hash & 255 << 1;
 
                             float vecX = (float)(xi - x) + RandVecs2D[idx] * cellularJitter;
                             float vecY = (float)(yi - y) + RandVecs2D[idx | 1] * cellularJitter;
@@ -1616,7 +1616,7 @@ namespace Source.Modules
                         for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
                             int hash = Hash(seed, xPrimed, yPrimed);
-                            int idx = hash & (255 << 1);
+                            int idx = hash & 255 << 1;
 
                             float vecX = (float)(xi - x) + RandVecs2D[idx] * cellularJitter;
                             float vecY = (float)(yi - y) + RandVecs2D[idx | 1] * cellularJitter;
@@ -1642,12 +1642,12 @@ namespace Source.Modules
                         for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
                             int hash = Hash(seed, xPrimed, yPrimed);
-                            int idx = hash & (255 << 1);
+                            int idx = hash & 255 << 1;
 
                             float vecX = (float)(xi - x) + RandVecs2D[idx] * cellularJitter;
                             float vecY = (float)(yi - y) + RandVecs2D[idx | 1] * cellularJitter;
 
-                            float newDistance = (FastAbs(vecX) + FastAbs(vecY)) + (vecX * vecX + vecY * vecY);
+                            float newDistance = FastAbs(vecX) + FastAbs(vecY) + (vecX * vecX + vecY * vecY);
 
                             distance1 = FastMax(FastMin(distance1, newDistance), distance0);
                             if (newDistance < distance0)
@@ -1724,7 +1724,7 @@ namespace Source.Modules
                             for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
                                 int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
-                                int idx = hash & (255 << 2);
+                                int idx = hash & 255 << 2;
 
                                 float vecX = (float)(xi - x) + RandVecs3D[idx] * cellularJitter;
                                 float vecY = (float)(yi - y) + RandVecs3D[idx | 1] * cellularJitter;
@@ -1757,7 +1757,7 @@ namespace Source.Modules
                             for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
                                 int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
-                                int idx = hash & (255 << 2);
+                                int idx = hash & 255 << 2;
 
                                 float vecX = (float)(xi - x) + RandVecs3D[idx] * cellularJitter;
                                 float vecY = (float)(yi - y) + RandVecs3D[idx | 1] * cellularJitter;
@@ -1790,13 +1790,13 @@ namespace Source.Modules
                             for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
                                 int hash = Hash(seed, xPrimed, yPrimed, zPrimed);
-                                int idx = hash & (255 << 2);
+                                int idx = hash & 255 << 2;
 
                                 float vecX = (float)(xi - x) + RandVecs3D[idx] * cellularJitter;
                                 float vecY = (float)(yi - y) + RandVecs3D[idx | 1] * cellularJitter;
                                 float vecZ = (float)(zi - z) + RandVecs3D[idx | 2] * cellularJitter;
 
-                                float newDistance = (FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                float newDistance = FastAbs(vecX) + FastAbs(vecY) + FastAbs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
                                 distance1 = FastMax(FastMin(distance1, newDistance), distance0);
                                 if (newDistance < distance0)
@@ -2214,14 +2214,14 @@ namespace Source.Modules
             int x1 = x0 + PrimeX;
             int y1 = y0 + PrimeY;
 
-            int hash0 = Hash(seed, x0, y0) & (255 << 1);
-            int hash1 = Hash(seed, x1, y0) & (255 << 1);
+            int hash0 = Hash(seed, x0, y0) & 255 << 1;
+            int hash1 = Hash(seed, x1, y0) & 255 << 1;
 
             float lx0x = Lerp(RandVecs2D[hash0], RandVecs2D[hash1], xs);
             float ly0x = Lerp(RandVecs2D[hash0 | 1], RandVecs2D[hash1 | 1], xs);
 
-            hash0 = Hash(seed, x0, y1) & (255 << 1);
-            hash1 = Hash(seed, x1, y1) & (255 << 1);
+            hash0 = Hash(seed, x0, y1) & 255 << 1;
+            hash1 = Hash(seed, x1, y1) & 255 << 1;
 
             float lx1x = Lerp(RandVecs2D[hash0], RandVecs2D[hash1], xs);
             float ly1x = Lerp(RandVecs2D[hash0 | 1], RandVecs2D[hash1 | 1], xs);
@@ -2251,15 +2251,15 @@ namespace Source.Modules
             int y1 = y0 + PrimeY;
             int z1 = z0 + PrimeZ;
 
-            int hash0 = Hash(seed, x0, y0, z0) & (255 << 2);
-            int hash1 = Hash(seed, x1, y0, z0) & (255 << 2);
+            int hash0 = Hash(seed, x0, y0, z0) & 255 << 2;
+            int hash1 = Hash(seed, x1, y0, z0) & 255 << 2;
 
             float lx0x = Lerp(RandVecs3D[hash0], RandVecs3D[hash1], xs);
             float ly0x = Lerp(RandVecs3D[hash0 | 1], RandVecs3D[hash1 | 1], xs);
             float lz0x = Lerp(RandVecs3D[hash0 | 2], RandVecs3D[hash1 | 2], xs);
 
-            hash0 = Hash(seed, x0, y1, z0) & (255 << 2);
-            hash1 = Hash(seed, x1, y1, z0) & (255 << 2);
+            hash0 = Hash(seed, x0, y1, z0) & 255 << 2;
+            hash1 = Hash(seed, x1, y1, z0) & 255 << 2;
 
             float lx1x = Lerp(RandVecs3D[hash0], RandVecs3D[hash1], xs);
             float ly1x = Lerp(RandVecs3D[hash0 | 1], RandVecs3D[hash1 | 1], xs);
@@ -2269,15 +2269,15 @@ namespace Source.Modules
             float ly0y = Lerp(ly0x, ly1x, ys);
             float lz0y = Lerp(lz0x, lz1x, ys);
 
-            hash0 = Hash(seed, x0, y0, z1) & (255 << 2);
-            hash1 = Hash(seed, x1, y0, z1) & (255 << 2);
+            hash0 = Hash(seed, x0, y0, z1) & 255 << 2;
+            hash1 = Hash(seed, x1, y0, z1) & 255 << 2;
 
             lx0x = Lerp(RandVecs3D[hash0], RandVecs3D[hash1], xs);
             ly0x = Lerp(RandVecs3D[hash0 | 1], RandVecs3D[hash1 | 1], xs);
             lz0x = Lerp(RandVecs3D[hash0 | 2], RandVecs3D[hash1 | 2], xs);
 
-            hash0 = Hash(seed, x0, y1, z1) & (255 << 2);
-            hash1 = Hash(seed, x1, y1, z1) & (255 << 2);
+            hash0 = Hash(seed, x0, y1, z1) & 255 << 2;
+            hash1 = Hash(seed, x1, y1, z1) & 255 << 2;
 
             lx1x = Lerp(RandVecs3D[hash0], RandVecs3D[hash1], xs);
             ly1x = Lerp(RandVecs3D[hash0 | 1], RandVecs3D[hash1 | 1], xs);
@@ -2323,7 +2323,7 @@ namespace Source.Modules
             float a = 0.5f - x0 * x0 - y0 * y0;
             if (a > 0)
             {
-                float aaaa = (a * a) * (a * a);
+                float aaaa = a * a * (a * a);
                 float xo, yo;
                 if (outGradOnly)
                     GradCoordOut(seed, i, j, out xo, out yo);
@@ -2338,7 +2338,7 @@ namespace Source.Modules
             {
                 float x2 = x0 + (2 * (float)G2 - 1);
                 float y2 = y0 + (2 * (float)G2 - 1);
-                float cccc = (c * c) * (c * c);
+                float cccc = c * c * (c * c);
                 float xo, yo;
                 if (outGradOnly)
                     GradCoordOut(seed, i + PrimeX, j + PrimeY, out xo, out yo);
@@ -2355,7 +2355,7 @@ namespace Source.Modules
                 float b = 0.5f - x1 * x1 - y1 * y1;
                 if (b > 0)
                 {
-                    float bbbb = (b * b) * (b * b);
+                    float bbbb = b * b * (b * b);
                     float xo, yo;
                     if (outGradOnly)
                         GradCoordOut(seed, i, j + PrimeY, out xo, out yo);
@@ -2372,7 +2372,7 @@ namespace Source.Modules
                 float b = 0.5f - x1 * x1 - y1 * y1;
                 if (b > 0)
                 {
-                    float bbbb = (b * b) * (b * b);
+                    float bbbb = b * b * (b * b);
                     float xo, yo;
                     if (outGradOnly)
                         GradCoordOut(seed, i + PrimeX, j, out xo, out yo);
@@ -2422,12 +2422,12 @@ namespace Source.Modules
             float vx, vy, vz;
             vx = vy = vz = 0;
 
-            float a = (0.6f - x0 * x0) - (y0 * y0 + z0 * z0);
+            float a = 0.6f - x0 * x0 - (y0 * y0 + z0 * z0);
             for (int l = 0; ; l++)
             {
                 if (a > 0)
                 {
-                    float aaaa = (a * a) * (a * a);
+                    float aaaa = a * a * (a * a);
                     float xo, yo, zo;
                     if (outGradOnly)
                         GradCoordOut(seed, i, j, k, out xo, out yo, out zo);
@@ -2468,7 +2468,7 @@ namespace Source.Modules
                 if (b > 1)
                 {
                     b -= 1;
-                    float bbbb = (b * b) * (b * b);
+                    float bbbb = b * b * (b * b);
                     float xo, yo, zo;
                     if (outGradOnly)
                         GradCoordOut(seed, i1, j1, k1, out xo, out yo, out zo);
@@ -2489,11 +2489,11 @@ namespace Source.Modules
                 y0 = yNSign * ay0;
                 z0 = zNSign * az0;
 
-                a += (0.75f - ax0) - (ay0 + az0);
+                a += 0.75f - ax0 - (ay0 + az0);
 
-                i += (xNSign >> 1) & PrimeX;
-                j += (yNSign >> 1) & PrimeY;
-                k += (zNSign >> 1) & PrimeZ;
+                i += xNSign >> 1 & PrimeX;
+                j += yNSign >> 1 & PrimeY;
+                k += zNSign >> 1 & PrimeZ;
 
                 xNSign = -xNSign;
                 yNSign = -yNSign;

@@ -17,7 +17,7 @@ using System.Text;
  *       .Next(5.0,25.0) -- two arguments means a range from low - high (int or float)
  */
 
-namespace Source.Library
+namespace Source.Shared
 {
 
     public sealed class PseudoRandom
@@ -31,10 +31,10 @@ namespace Source.Library
         public PseudoRandom(decimal seed, decimal mult, decimal mod, decimal inc)
         {
 #if DEBUG
-            if (seed == 0) throw new ArgumentOutOfRangeException(nameof(seed), "Don't pass negative seed value to Pseudo Random");
-            if (mult == 0) throw new ArgumentOutOfRangeException(nameof(mult), "Don't pass negative mult value to Pseudo Random");
-            if (mod == 0) throw new ArgumentOutOfRangeException(nameof(mod), "Don't pass negative mod value to Pseudo Random");
-            if (inc == 0) throw new ArgumentOutOfRangeException(nameof(inc), "Don't pass negative inc value to Pseudo Random");
+            if (seed < 0) throw new ArgumentOutOfRangeException(nameof(seed), "Don't pass negative seed value to Pseudo Random");
+            if (mult < 0) throw new ArgumentOutOfRangeException(nameof(mult), "Don't pass negative mult value to Pseudo Random");
+            if (mod < 0) throw new ArgumentOutOfRangeException(nameof(mod), "Don't pass negative mod value to Pseudo Random");
+            if (inc < 0) throw new ArgumentOutOfRangeException(nameof(inc), "Don't pass negative inc value to Pseudo Random");
 #else
             if (seed < 0 || inc < 0 || mod < 0 || mult < 0)
                 throw new ArgumentOutOfRangeException();
@@ -65,7 +65,7 @@ namespace Source.Library
         /// <summary>
         /// Generate a new random values in between 1 and low parameters
         /// </summary>
-        /// <param name="low">Maximum value to generate</param>
+        /// <param name="max">Maximum value to generate</param>
         /// <returns></returns>
         public decimal Next(decimal max)
         {
@@ -101,8 +101,8 @@ namespace Source.Library
         /// Generate a new random value in between low and high parameters<br/>
         /// This method convert the output to became integer
         /// </summary>
-        /// <param name="low"></param>
-        /// <param name="high"></param>
+        /// <param name="low">Minimum value</param>
+        /// <param name="high">Maximum value</param>
         /// <returns></returns>
         public int Next(int low, int high)
         {
@@ -112,8 +112,8 @@ namespace Source.Library
 
             seed = m;
             m *= div;
-            m *= (high - low) + low;
-            m = m >= 0 ? Math.Floor(m + (decimal)0.5) : Math.Ceiling(m - (decimal)0.5);
+            m *= high - low + low;
+            m = m >= 0 ? Math.Floor(m + 0.5m) : Math.Ceiling(m - 0.5m);
             return (int)m;
         }
     }

@@ -5,7 +5,7 @@ using static War3Api.Blizzard;
 using static War3Api.Common;
 
 
-namespace Source.Modules
+namespace Source.Shared
 {
     public sealed class ArcingTT : IPeriodicAction
     {
@@ -39,10 +39,11 @@ namespace Source.Modules
             if (passed >= lifeSpan)
             {
                 Active = false;
+                tt = null;
                 cache.Push(this);
                 return;
             }
-			if (tt == null) return;
+            if (tt == null) return;
             float point = (float)Math.Sin(Math.PI * ((lifeSpan - passed) / timeScale));
             x += acos;
             y += asin;

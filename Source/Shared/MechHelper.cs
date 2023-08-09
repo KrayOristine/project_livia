@@ -8,7 +8,7 @@ using static War3Api.Common;
 
 namespace Source.Shared
 {
-    internal static class AbilityId
+    static class AbilityId
     {
         public const int Abun = 1096971630;
         public const int Silence = 1513107504; // Z000

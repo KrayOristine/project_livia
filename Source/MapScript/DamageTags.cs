@@ -1,12 +1,12 @@
-﻿using Source.Modules;
-using Source.Shared;
+﻿using Source.Shared;
 using System;
 using System.Collections.Generic;
 using static War3Api.Common;
 using static War3Api.Blizzard;
 using WCSharp.Events;
+using Source.GameSystem.Damage;
 
-namespace Source.Trigger
+namespace Source.MapScript
 {
     public sealed class StackingDamageTag : IPeriodicDisposableAction
     {
@@ -76,7 +76,7 @@ namespace Source.Trigger
         /// <summary>
         /// Update the amount of damage
         /// </summary>
-        /// <param name="damage">The amount of damage to change</param>
+        /// <param name="newDamage">The amount of damage to change</param>
         /// <param name="add">If <see langword="true"/> - will instead add rather than set</param>
         /// <param name="size">The size of the new text</param>
         /// <returns>The same <see cref="StackingDamageTag"/> object</returns>
@@ -96,24 +96,24 @@ namespace Source.Trigger
         private static readonly Color chaosStart = Color.FromArgb(0x00C8A2C8); // lilac
         private static readonly Color chaosEnd = Color.FromArgb(0x0039254D); // dark purple
 
-        private static string GetDamageColor(bool[] flags, bool attack, float amount)
+        private static string GetDamageColor(List<bool> flags, bool attack, float amount)
         {
-            if (amount < 0.0f || flags[(int)DamageType.Heal]) return "|c0096FF96+ "; // green
-            else if (flags[(int)DamageType.Pure] || flags[(int)DamageType.RAW] || flags[(int)DamageType.INTERNAL]) return "|c00FFFFFF"; // white
-            else if (flags[(int)DamageType.Evaded] || flags[(int)DamageType.Shield]) return "|c00808080"; // gray
-            else if (flags[(int)DamageType.Critical]) return "|c00E10600"; // slightly red
-            else if (flags[(int)DamageType.Physical] || attack) return "|c00FF7F00"; // orange
-            else if (flags[(int)DamageType.Magical] || flags[(int)DamageType.Spell]) return "|c002389DA"; // slightly darker blue
-            else if (flags[(int)DamageType.Elemental])
+            if (amount < 0.0f || flags[(int)DamageTypes.Heal]) return "|c0096FF96+ "; // green
+            else if (flags[(int)DamageTypes.Pure] || flags[(int)DamageTypes.RAW] || flags[(int)DamageTypes.INTERNAL]) return "|c00FFFFFF"; // white
+            else if (flags[(int)DamageTypes.Evaded] || flags[(int)DamageTypes.Shield]) return "|c00808080"; // gray
+            else if (flags[(int)DamageTypes.Critical]) return "|c00E10600"; // slightly red
+            else if (flags[(int)DamageTypes.Physical] || attack) return "|c00FF7F00"; // orange
+            else if (flags[(int)DamageTypes.Magical] || flags[(int)DamageTypes.Spell]) return "|c002389DA"; // slightly darker blue
+            else if (flags[(int)DamageTypes.Elemental])
             {
-                if (flags[(int)DamageType.Fire]) return "|c00CD001A"; // cherry red
-                else if (flags[(int)DamageType.Water]) return "|c0074CCF4"; // very light blue
-                else if (flags[(int)DamageType.Nature]) return "|c002D5A27"; // green leaf color
-                else if (flags[(int)DamageType.Metal]) return "|c00FFCC00"; // ucs gold
-                else if (flags[(int)DamageType.Wind]) return "|c00D1F1F9"; // wind
-                else if (flags[(int)DamageType.Lightning]) return "|c00C8A2C8"; // lilac
-                else if (flags[(int)DamageType.Light]) return "|c00FFFFED"; // light yellow
-                else if (flags[(int)DamageType.Dark]) return "|c0039254D"; // dark purple
+                if (flags[(int)DamageTypes.Fire]) return "|c00CD001A"; // cherry red
+                else if (flags[(int)DamageTypes.Water]) return "|c0074CCF4"; // very light blue
+                else if (flags[(int)DamageTypes.Nature]) return "|c002D5A27"; // green leaf color
+                else if (flags[(int)DamageTypes.Metal]) return "|c00FFCC00"; // UCS gold
+                else if (flags[(int)DamageTypes.Wind]) return "|c00D1F1F9"; // wind
+                else if (flags[(int)DamageTypes.Lightning]) return "|c00C8A2C8"; // lilac
+                else if (flags[(int)DamageTypes.Light]) return "|c00FFFFED"; // light yellow
+                else if (flags[(int)DamageTypes.Dark]) return "|c0039254D"; // dark purple
             }
 
             return "|c00E45AAA"; // Some how it passed all filter, let indicate it a 'error damage'
@@ -122,7 +122,7 @@ namespace Source.Trigger
         private static void NormalDamageTag(DamageInstance d, unit target)
         {
             string colorized;
-            if (d.Flags[(int)DamageType.Chaos])
+            if (d.Flags[(int)DamageTypes.Chaos])
             {
                 colorized = Color.GenerateApplyGradient(d.Damage.ToString(), chaosStart, chaosEnd);
             }
@@ -157,7 +157,7 @@ namespace Source.Trigger
 
             if (string.IsNullOrEmpty(stack.Text))
             {
-                if (d.Flags[(int)DamageType.Chaos])
+                if (d.Flags[(int)DamageTypes.Chaos])
                 {
                     colorized = Color.GenerateApplyGradient(d.Damage.ToString(), chaosStart, chaosEnd);
                 }
@@ -172,7 +172,7 @@ namespace Source.Trigger
 
             float old = stack.Damage;
             float newDmg = old + d.Damage;
-            if (d.Flags[(int)DamageType.Chaos])
+            if (d.Flags[(int)DamageTypes.Chaos])
             {
                 colorized = Color.GenerateApplyGradient(newDmg.ToString(), chaosStart, chaosEnd);
             } else
@@ -188,7 +188,7 @@ namespace Source.Trigger
             try
             {
 
-                var d = DamageEngine.Current;
+                var d = Engine.Current;
                 int id = GetPlayerId(d.SourcePlayer);
                 if (disabled[id]) return;
                 if (enabled[id] == 2) NormalDamageTag(d, d.Target);
@@ -214,21 +214,25 @@ namespace Source.Trigger
             {
                 enabled[id] = 2;
                 DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been enabled");
+				return;
             }
             else if (mode == "no stack" || mode == "no stacking" || mode == "no merge" || mode == "no merging")
             {
                 enabled[id] = 1;
                 DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been disabled");
+				return;
             }
 
             if (mode == "enable")
             {
                 disabled[id] = false;
                 enabled[id] = 1;
+                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is enabled");
             }
             else if (mode == "disable")
             {
                 disabled[id] = true;
+                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is disabled");
             }
         }
 
@@ -242,7 +246,7 @@ namespace Source.Trigger
                 TriggerRegisterPlayerChatEvent(trig, Player(i), "-damage", false);
             }
             TriggerAddAction(trig, OnChatEvent);
-            DamageEngine.Register(DamageEvent.DAMAGED, 9999999, OnDamage);
+            Engine.Register(DamageEvent.DAMAGED, 9999999, OnDamage);
         }
     }
 }

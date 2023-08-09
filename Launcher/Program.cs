@@ -10,6 +10,9 @@ using War3Net.Build;
 using War3Net.Build.Extensions;
 using War3Net.IO.Mpq;
 using WCSharp.ConstantGenerator;
+using Jering.Javascript.NodeJS;
+using System.Reflection.Metadata;
+using System.Collections.Generic;
 
 namespace Launcher
 {
@@ -37,15 +40,18 @@ namespace Launcher
 
         private static void Main()
         {
-            Console.WriteLine("The following actions are available:");
-            Console.WriteLine("1. Generate constants");
-            Console.WriteLine("2. Compile map");
-            Console.WriteLine("3. Compile and run map");
             MakeDecision();
         }
 
         private static void MakeDecision()
         {
+			Console.WriteLine("The following actions are available:");
+            Console.WriteLine("1. Generate constants");
+            Console.WriteLine("2. Run ObjectMerger");
+            Console.WriteLine("3. Compile map");
+			Console.WriteLine("4. Compile & Run map");
+			Console.WriteLine("5. Compile without ObjectMerger");
+            Console.WriteLine("6. Compile & Run without ObjectMerger");
             Console.Write("Please type the number of your desired action: ");
             switch (Console.ReadKey().Key)
             {
@@ -58,17 +64,60 @@ namespace Launcher
                     break;
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                    Build(false);
-                    break;
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
+                case ConsoleKey.NumPad4:
+                case ConsoleKey.D4:
+                    Console.Clear();
+                    Console.Write($"{Environment.NewLine}Unimplemented input.");
+                    Console.WriteLine("");
+                    MakeDecision();
+                    break;
+
+                case ConsoleKey.NumPad5:
+                case ConsoleKey.D5:
+                    Console.WriteLine("");
+                    Build(false);
+                    break;
+                case ConsoleKey.NumPad6:
+                case ConsoleKey.D6:
+                    Console.WriteLine("");
                     Build(true);
                     break;
                 default:
-                    Console.WriteLine($"{Environment.NewLine}Invalid input. Please choose again.");
+					Console.Clear();
+                    Console.WriteLine($"{Environment.NewLine}Invalid input. Please choose again.{Environment.NewLine}");
                     MakeDecision();
                     break;
             }
+        }
+
+        public static string MinifyScript(string script)
+        {
+            var result = StaticNodeJSService.InvokeFromFileAsync<string>(@"..\..\..\nodejs\minify.js", null, new object[] { script }).GetAwaiter().GetResult();
+
+            return result;
+        }
+
+        public static void AddFiles(MapBuilder builder, Map map, string path, string searchPattern, SearchOption searchOption)
+        {
+            if (builder == null) throw new ArgumentNullException(nameof(builder), "builder param can't be null");
+            var directoryLength = path.Length;
+            if (!path.EndsWith('/') && !path.EndsWith('\\')) directoryLength++;
+            List<MpqFile> filesList = new();
+            foreach (var file in Directory.EnumerateFiles(path, searchPattern, searchOption))
+            {
+                var name = file[directoryLength..];
+                var fileStream = File.OpenRead(file);
+                if (!map.SetFile(name, false, fileStream))
+                {
+                    var mpq = MpqFile.New(fileStream, name, MpqLocale.Neutral, false);
+                    // do stuff with it
+
+                    filesList.Add(mpq);
+                }
+            }
+            builder.AddFiles(filesList.AsEnumerable());
         }
 
         public static void Build(bool launch)
@@ -80,13 +129,20 @@ namespace Launcher
             // Load existing map data
             var map = Map.Open(BASE_MAP_PATH);
             var builder = new MapBuilder(map);
-            builder.AddFiles(BASE_MAP_PATH, "*", SearchOption.AllDirectories);
-            builder.AddFiles(ASSETS_FOLDER_PATH, "*", SearchOption.AllDirectories);
+
+            AddFiles(builder, map, BASE_MAP_PATH, "*", SearchOption.AllDirectories);
+            AddFiles(builder, map, ASSETS_FOLDER_PATH, "*", SearchOption.AllDirectories);
 
             // Set debug options if necessary, configure compiler
-            var csc = DEBUG ? "-debug -define:DEBUG" : null;
+#if DEBUG
+            var csc = "-debug -define:DEBUG";
+#else
+            var csc = string.Empty;
+#endif
             var csproj = Directory.EnumerateFiles(SOURCE_CODE_PROJECT_FOLDER_PATH, "*.csproj", SearchOption.TopDirectoryOnly).Single();
-            var compiler = new Compiler(csproj, OUTPUT_FOLDER_PATH, string.Empty, null, "War3Api.*;WCSharp.*", "", csc, false, null, string.Empty)
+            var meta = string.Join(";", Directory.EnumerateFiles(SOURCE_CODE_PROJECT_FOLDER_PATH, "*.meta.xml", SearchOption.AllDirectories));
+
+            var compiler = new Compiler(csproj, OUTPUT_FOLDER_PATH, string.Empty, meta, "War3Api.*;WCSharp.*", "", csc, false, null, string.Empty)
             {
                 IsExportMetadata = true,
                 IsModule = false,
@@ -101,19 +157,35 @@ namespace Launcher
             var commonJ = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Warcraft III/JassHelper/common.j");
             var compileResult = map.CompileScript(compiler, coreSystemFiles, blizzardJ, commonJ);
 
-            // If compilation failed, output an error
+            // If something wrong happen print it out
             if (!compileResult.Success)
             {
-                throw new Exception(compileResult.Diagnostics.First(x => x.Severity == DiagnosticSeverity.Error).GetMessage());
+                Console.Clear();
+                foreach (Diagnostic d in compileResult.Diagnostics)
+                {
+                    if (d.Severity == DiagnosticSeverity.Warning && (d.Id == "CS0626" || d.Id == "CS8632")) continue;
+
+                    Console.WriteLine("=============================================");
+                    Console.WriteLine(d.GetMessage());
+                    var pos = d.Location.GetLineSpan();
+                    Console.Write($"In {pos.Path}:line {pos.StartLinePosition.Line}, char {pos.StartLinePosition.Character}\n");
+                }
+                Console.WriteLine("=============================================");
+                throw new Exception("Compiler error, see all above message for more details information");
             }
+
+#if !DEBUG
+            map.Script = MinifyScript(map.Script);
+#endif
 
             // Update war3map.lua so you can inspect the generated Lua code easily
             File.WriteAllText(Path.Combine(OUTPUT_FOLDER_PATH, OUTPUT_SCRIPT_NAME), map.Script);
 
+
             // Build w3x file
             var archiveCreateOptions = new MpqArchiveCreateOptions
             {
-                ListFileCreateMode = MpqFileCreateMode.Overwrite,
+                ListFileCreateMode = MpqFileCreateMode.Prune,
                 AttributesCreateMode = MpqFileCreateMode.Prune,
                 BlockSize = 3,
             };
@@ -147,12 +219,14 @@ namespace Launcher
                     commandLineArgs.Append($" -loadfile \"{absoluteMapPath}\"");
 
                     Process.Start(wc3exe, commandLineArgs.ToString());
+                    Console.WriteLine("The map should be loaded on reforged now...");
                 }
                 else
                 {
-                    throw new Exception("Please set wc3exe in Launcher/app.config to the path of your Warcraft III executable.");
+                    throw new AggregateException("Please set wc3exe in Launcher/app.config to the path of your Warcraft III executable.");
                 }
             }
+            else Console.WriteLine("Build finishes, you can close this console for now");
         }
     }
 }

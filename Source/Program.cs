@@ -1,12 +1,29 @@
-﻿using Source.Library;
-using Source.Modules;
+﻿/*
+    Copyright (C) 2023  Kray Oristine
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+using Source.GameSystem.WCObject;
 using Source.Shared;
-using Source.Trigger;
+using Source.MapScript;
 using System;
 using WCSharp.Events;
 using WCSharp.Missiles;
 using WCSharp.Sync;
+using static Source.Shared.Lua;
 using static War3Api.Common;
+using Source.GameSystem.Damage;
 
 namespace Source
 {
@@ -30,7 +47,8 @@ namespace Source
             try
             {
                 method.Invoke();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Logger.Error("Initialization", ex.ToString());
             }
@@ -43,7 +61,7 @@ namespace Source
 
         private static void InitModules()
         {
-            // To add
+            Engine.InitEngine();
         }
 
         private static void InitLibrary()
@@ -72,14 +90,23 @@ namespace Source
 
                 CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
                 CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
-
 #endif
-                TryInit(InitShared);
                 TryInit(InitModules);
+                TryInit(InitShared);
                 TryInit(InitLibrary);
                 TryInit(InitTrigger);
 
                 Logger.Debug("Initialization", "Init completed");
+
+                // hash test
+                Console.WriteLine("Hashing testing in progress, there should be no different hash on the same input and seed");
+                var original = "Lorem ipsum dolor sit amet, consectetur adipiscing elit viverra.";
+                Lua.Assert(Hash.MurMur.HashV2(original, 6969) == Hash.MurMur.HashV2(original, 6969), "MurMur HashV2 failed, different hash detected");
+                Lua.Assert(Hash.MurMur.HashV3(original, 9696) == Hash.MurMur.HashV3(original, 9696), "MurMur HashV3 failed, different hash detected");
+                Lua.Assert(Hash.MD5.Hash(original) == Hash.MD5.Hash(original), "MD5 Hash failed, different hash detected");
+                Console.WriteLine("Hashing passed, no different hash on same input and seed");
+
+
             }
             catch (Exception ex)
             {

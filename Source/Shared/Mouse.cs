@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using War3Api;
 
-namespace Source.Library
+namespace Source.Shared
 {
     public static class Mouse
     {
