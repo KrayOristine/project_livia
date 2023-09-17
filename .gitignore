@@ -392,3 +392,5 @@ Artifacts/
 Launcher/*
 /Launcher/Program.cs
 /Launcher/Program.cs
+/Launcher/Launcher.csproj
+/Launcher/app.config
