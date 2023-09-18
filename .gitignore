@@ -394,3 +394,4 @@ Launcher/*
 /Launcher/Launcher.csproj
 /Launcher/app.config
 /Source/Source.licenseheader
+/Launcher/app.config.json
