@@ -1,5 +1,5 @@
-﻿// ------------------------------------------------------------------------------
-// <copyright file="HeroBank.cs" company="Kray Oristine">
+// ------------------------------------------------------------------------------
+// <copyright file="BoundObject.cs" company="Kray Oristine">
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -14,20 +14,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
-using War3Api;
+using System;
 
-/*
- * Ozzzzymaniac Custom Save/Load
- *
- * This is the core function of the maps
- */
-
-namespace Source.GameSystem.Save
+namespace Source.Shared
 {
-    public class HeroBank : Saveable
-    {
-        internal HeroBank(Common.player player, int slot) : base(player, slot)
-        {
-        }
-    }
+
 }

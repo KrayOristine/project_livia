@@ -1,20 +1,20 @@
-﻿/*
-    Copyright (C) 2023  Kray Oristine
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-using Source.GameSystem.WCObject;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="Program.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using Source.GameSystem.W3OOP;
 using Source.Shared;
 using Source.MapScript;
 using System;
@@ -24,6 +24,7 @@ using WCSharp.Sync;
 using static Source.Shared.Lua;
 using static War3Api.Common;
 using Source.GameSystem.Damage;
+using Source.GameSystem.UI;
 
 namespace Source
 {
@@ -74,6 +75,14 @@ namespace Source
             DamageTag.Init();
         }
 
+        private static void InitFrame()
+        {
+            Frame.HideOriginFrames(true);
+            Frame.GetByName("ConsoleUIBackdrop", 0).SetSize(0, 0.0001f);
+
+            SaveSlot.Init();
+        }
+
         private static void Start()
         {
             try
@@ -91,26 +100,34 @@ namespace Source
                 CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
                 CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
 #endif
+                DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 100, "|c00ff0000WARNING|r: Map initialization phase begin, HUGE LAGE INCOMING");
+
+                // Disable player mouse and changing shit
+                ShowInterface(false, 0);
+                EnableUserControl(false);
+                BlzEnableCursor(false);
+                EnableOcclusion(false);
+
                 TryInit(InitModules);
                 TryInit(InitShared);
                 TryInit(InitLibrary);
                 TryInit(InitTrigger);
+                /// Frame initialization must always after everything
+                TryInit(InitFrame);
+
+                ShowInterface(true, 0);
+                EnableUserControl(true);
+                BlzEnableCursor(true);
+                EnableOcclusion(true);
+
 
                 Logger.Debug("Initialization", "Init completed");
-
-                // hash test
-                Console.WriteLine("Hashing testing in progress, there should be no different hash on the same input and seed");
-                var original = "Lorem ipsum dolor sit amet, consectetur adipiscing elit viverra.";
-                Lua.Assert(Hash.MurMur.HashV2(original, 6969) == Hash.MurMur.HashV2(original, 6969), "MurMur HashV2 failed, different hash detected");
-                Lua.Assert(Hash.MurMur.HashV3(original, 9696) == Hash.MurMur.HashV3(original, 9696), "MurMur HashV3 failed, different hash detected");
-                Lua.Assert(Hash.MD5.Hash(original) == Hash.MD5.Hash(original), "MD5 Hash failed, different hash detected");
-                Console.WriteLine("Hashing passed, no different hash on same input and seed");
 
 
             }
             catch (Exception ex)
             {
-                DisplayTextToPlayer(GetLocalPlayer(), 0, 0, ex.Message);
+                DisplayTextToPlayer(GetLocalPlayer(), 0, 0, ex.ToString());
             }
         }
     }

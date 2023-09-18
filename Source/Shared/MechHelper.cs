@@ -1,4 +1,20 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="MechHelper.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using WCSharp.Events;
 using WCSharp.Shared.Data;
@@ -8,12 +24,12 @@ using static War3Api.Common;
 
 namespace Source.Shared
 {
-    static class AbilityId
+    enum AbilityId : int
     {
-        public const int Abun = 1096971630;
-        public const int Silence = 1513107504; // Z000
-        public const int Stun = 1513107505; // Z001
-        public const int Slow = 1513107506; // Z002
+        Abun = 1096971630,
+        Silence = 1513107504, // Z000
+        Stun = 1513107505, // Z001
+        Slow = 1513107506 // Z002
     }
 
     public sealed class UnitPool
@@ -115,7 +131,7 @@ namespace Source.Shared
                 DestroyEffect(Effect);
                 Effect = null;
             }
-            UnitRemoveAbility(Target, AbilityId.Abun);
+            UnitRemoveAbility(Target, (int)AbilityId.Abun);
             if (IsSelected)
             {
                 SelectUnitAddForPlayer(Target, GetOwningPlayer(Target));
@@ -162,7 +178,7 @@ namespace Source.Shared
                 temp.Change = 0;
                 temp.IsSelected = IsUnitSelected(target, GetOwningPlayer(target));
 
-                UnitAddAbility(target, AbilityId.Abun);
+                UnitAddAbility(target, (int)AbilityId.Abun);
 
                 if (temp.IsSelected) SelectUnit(target, false);
 
@@ -197,7 +213,7 @@ namespace Source.Shared
                 temp.Change = 0;
                 temp.IsSelected = IsUnitSelected(target, GetOwningPlayer(target));
 
-                UnitAddAbility(target, AbilityId.Abun);
+                UnitAddAbility(target, (int)AbilityId.Abun);
 
                 if (temp.IsSelected) SelectUnit(target, false);
             }
@@ -324,8 +340,8 @@ namespace Source.Shared
 
             activeDict[target] += apply ? 1 : -1;
 
-            if (activeDict[target] > 0) UnitAddAbility(target, AbilityId.Abun);
-            else UnitRemoveAbility(target, AbilityId.Abun);
+            if (activeDict[target] > 0) UnitAddAbility(target, (int)AbilityId.Abun);
+            else UnitRemoveAbility(target, (int)AbilityId.Abun);
         }
 
         /// <summary>
@@ -392,8 +408,8 @@ namespace Source.Shared
 
             SetUnitX(dummy, GetUnitX(target));
             SetUnitY(dummy, GetUnitY(target));
-            UnitAddAbility(dummy, AbilityId.Silence);
-            ModifyDuration(dummy, AbilityId.Silence, BlzGetUnitAbility(dummy, AbilityId.Silence), duration);
+            UnitAddAbility(dummy, (int)AbilityId.Silence);
+            ModifyDuration(dummy, (int)AbilityId.Silence, BlzGetUnitAbility(dummy, (int)AbilityId.Silence), duration);
             IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, target);
             DummySystem.RecycleDummy(dummy, 0f);
         }
@@ -417,8 +433,8 @@ namespace Source.Shared
                     unit dummy = DummySystem.GetDummy();
                     SetUnitX(dummy, GetUnitX(curr));
                     SetUnitY(dummy, GetUnitY(curr));
-                    UnitAddAbility(dummy, AbilityId.Silence);
-                    ModifyDuration(dummy, AbilityId.Silence, BlzGetUnitAbility(dummy, AbilityId.Silence), duration);
+                    UnitAddAbility(dummy, (int)AbilityId.Silence);
+                    ModifyDuration(dummy, (int)AbilityId.Silence, BlzGetUnitAbility(dummy, (int)AbilityId.Silence), duration);
                     IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, curr);
                     DummySystem.RecycleDummy(dummy, 0f);
                 }
@@ -452,8 +468,8 @@ namespace Source.Shared
 
             SetUnitX(dummy, GetUnitX(target));
             SetUnitY(dummy, GetUnitY(target));
-            UnitAddAbility(dummy, AbilityId.Stun);
-            ModifyDuration(dummy, AbilityId.Stun, BlzGetUnitAbility(dummy, AbilityId.Stun), duration);
+            UnitAddAbility(dummy, (int)AbilityId.Stun);
+            ModifyDuration(dummy, (int)AbilityId.Stun, BlzGetUnitAbility(dummy, (int)AbilityId.Stun), duration);
             IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, target);
             DummySystem.RecycleDummy(dummy, 0f);
         }
@@ -477,8 +493,8 @@ namespace Source.Shared
                     unit dummy = DummySystem.GetDummy();
                     SetUnitX(dummy, GetUnitX(curr));
                     SetUnitY(dummy, GetUnitY(curr));
-                    UnitAddAbility(dummy, AbilityId.Stun);
-                    ModifyDuration(dummy, AbilityId.Stun, BlzGetUnitAbility(dummy, AbilityId.Stun), duration);
+                    UnitAddAbility(dummy, (int)AbilityId.Stun);
+                    ModifyDuration(dummy, (int)AbilityId.Stun, BlzGetUnitAbility(dummy, (int)AbilityId.Stun), duration);
                     IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, curr);
                     DummySystem.RecycleDummy(dummy, 0f);
                 }

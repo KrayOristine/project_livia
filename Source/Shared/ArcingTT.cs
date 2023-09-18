@@ -1,4 +1,20 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="ArcingTT.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using WCSharp.Events;
 using static War3Api.Blizzard;
@@ -9,17 +25,17 @@ namespace Source.Shared
 {
     public sealed class ArcingTT : IPeriodicAction
     {
-        internal const float SIZE_MIN = 0.018f; // Minimum size of text
-        internal const float SIZE_BONUS = 0.012f; // Text size increase
-        internal const float TIME_LIFE = 1.0f; // How long the text lasts
-        internal const float TIME_FADE = 0.8f; // When does the text start to fade
-        internal const int Z_OFFSET = 70; // Height above unit
-        internal const int Z_OFFSET_BON = 50; // How much extra height the text gains
-        internal const int VELOCITY = 4; //  How fast the text moves in x/y plane
-        internal const float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
+        private const float SIZE_MIN = 0.018f; // Minimum size of text
+        private const float SIZE_BONUS = 0.012f; // Text size increase
+        private const float TIME_LIFE = 1.0f; // How long the text lasts
+        private const float TIME_FADE = 0.8f; // When does the text start to fade
+        private const int Z_OFFSET = 70; // Height above unit
+        private const int Z_OFFSET_BON = 50; // How much extra height the text gains
+        private const int VELOCITY = 4; //  How fast the text moves in x/y plane
+        private const float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
 
-        internal static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
-        internal static readonly Stack<ArcingTT> cache = new();
+        private static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
+        private static readonly Stack<ArcingTT> cache = new();
 
         public float passed = 0;
         public float lifeSpan;

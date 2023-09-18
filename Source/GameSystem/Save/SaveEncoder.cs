@@ -1,4 +1,21 @@
-﻿///------------------------------------
+﻿// ------------------------------------------------------------------------------
+// <copyright file="SaveEncoder.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+
+///------------------------------------
 /// Encode player names to ensure safety and disallow code duplication
 #define SAVE_SYSTEM_ENCODE_PLAYER
 /// Encode additional information to further increase tamper protection but result in a longer save code
@@ -22,9 +39,7 @@ namespace Source.GameSystem.Save
          */
 
         // Modify these 3 to confuse the cheater and save generation tools
-        internal static string h_alphabet = "mbhfnzvcixagjdskroqtpwylue"; //default are "abcdefghijklmnopqrstuvwxyz"
-
-        internal static string h_number = "3267084159"; // default are "0123456789"
+        internal static string hashCharset = "2804397516mbhfnzvcixagjdskroqtpwylueMBHFNZVCIXAGJDSKROQTPWYLUE"; //default are "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         //Modify to allow to code to generate unique combination and prevent automated code generator
         internal static string code = "VoyCx,tZ(OzB-U2klSN*ipK~[J/Y#3u67ns@Q%5vMIDjd?Ge}Wf4wL=XP9_r8h<&q'{H)+^!cRbg>A]`mF0E.T1a$";
@@ -49,13 +64,9 @@ namespace Source.GameSystem.Save
         /// <returns>Encoded number re-presenting input char</returns>
         internal static int HashChar(char c)
         {
-            for (int i = 0; i < 26; i++)
+            for (int i = 0; i < hashCharset.Length; i++)
             {
-                if (c == h_alphabet[i]) return i;
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                if (c == h_number[i]) return i;
+                if (c == hashCharset[i]) return i;
             }
             return 0;
         }
@@ -115,6 +126,7 @@ namespace Source.GameSystem.Save
         public static string Encode(int[] data, player player, int maxLength = 200)
         {
             if (data.Length > maxLength - 10) throw new ArgumentOutOfRangeException(nameof(data), "Attempt to encode too much data");
+            if (maxLength < 1) throw new ArgumentOutOfRangeException(nameof(maxLength), "The maximum length to encode can't be lesser than 1");
 
             StringBuilder buffer = new();
             for (int i = 0; i < data.Length; i++) buffer.Append(data[i]).Append('-');
@@ -124,45 +136,45 @@ namespace Source.GameSystem.Save
             buffer.Append(HashData(buffer.ToString(), player));
 #endif
 
-            int[] arr = new int[maxLength];
-            int m = 0, k = 0;
+            int[] largeIntDigit = new int[maxLength];
+            int numDigits = 0, carry = 0;
             for (int i = 0; i < buffer.Length; i++)
             {
-                for (int j = 0; j <= m; j++)
+                for (int j = 0; j <= numDigits; j++)
                 {
-                    arr[j] *= 0xb;
+                    largeIntDigit[j] *= 0xB;
                 }
                 for (int j = 0; j < 10; j++)
                 {
                     if (buffer[i] == e_number[j])
                     {
-                        arr[0] += j;
+                        largeIntDigit[0] += j;
                         break;
                     }
                 }
-                for (int j = 0; j <= m; j++)
+                for (int j = 0; j <= numDigits; j++)
                 {
-                    k = arr[j] / 0xf4240;
-                    arr[j] -= k * 0xf4240;
-                    arr[j + 1] += k;
+                    carry = largeIntDigit[j] / 0xF4240;
+                    largeIntDigit[j] -= carry * 0xF4240;
+                    largeIntDigit[j + 1] += carry;
                 }
-                if (k > 0) m++;
+                if (carry > 0) numDigits++;
             }
 
             buffer.Clear();
-            while (m > 0)
+            while (numDigits > 0)
             {
-                for (int j = m; j > 0; j--)
+                for (int j = numDigits; j > 0; j--)
                 {
-                    k = arr[j] / codeLength;
-                    arr[j - 1] += (arr[j] - k * codeLength) * 0xf4240;
-                    arr[j] = k;
+                    carry = largeIntDigit[j] / codeLength;
+                    largeIntDigit[j - 1] += (largeIntDigit[j] - carry * codeLength) * 0xF4240;
+                    largeIntDigit[j] = carry;
                 }
-                k = arr[0] / codeLength;
-                int i = arr[0] - k * codeLength;
+                carry = largeIntDigit[0] / codeLength;
+                int i = largeIntDigit[0] - carry * codeLength;
                 buffer.Append(code[i]);
-                arr[0] = k;
-                if (arr[m] == 0) m--;
+                largeIntDigit[0] = carry;
+                if (largeIntDigit[numDigits] == 0) numDigits--;
             }
 
             return buffer.ToString();
@@ -178,8 +190,8 @@ namespace Source.GameSystem.Save
         /// <exception cref="ArgumentOutOfRangeException">Array size longer than 300</exception>
         public static string Encode(int[] data, int maxLength = 300)
         {
-            if (data.Length > maxLength - 10) throw new ArgumentOutOfRangeException(nameof(data), "Attempt to encode too much data");
-
+            if (data.Length > maxLength) throw new ArgumentOutOfRangeException(nameof(data), "Attempt to encode too much amount of data");
+            if (maxLength < 1) throw new ArgumentOutOfRangeException(nameof(maxLength), "The maximum length to encode can't be lesser than 1");
             StringBuilder buffer = new();
             for (int i = 0; i < data.Length; i++) buffer.Append(data[i]).Append('-');
             if (data[0] == 0) buffer.Insert(0, '-');
@@ -188,7 +200,7 @@ namespace Source.GameSystem.Save
             buffer.Append(HashData(buffer.ToString()));
 #endif
 
-            int[] arr = new int[maxLength];
+            int[] arr = new int[maxLength*2];
             int m = 0, k = 0;
             for (int i = 0; i < buffer.Length; i++)
             {

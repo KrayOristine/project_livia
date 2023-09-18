@@ -1,22 +1,33 @@
-﻿// Ignore Spelling: Metatable Metatables rhs lhs Yieldable Utf repl tbl
+﻿// ------------------------------------------------------------------------------
+// <copyright file="Lua.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+
+// Ignore Spelling: Metatable Metatables rhs lhs Yieldable Utf repl tbl Acos Atan Asin
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Source.Shared
 {
-    /*
-     *  This snippet allow user to use lua in the c# code but still retain c# static type
-     *
-     *  but at a cost, some method will not be able to put in here
-     */
 
     /// <summary>
     /// Static entry class contain all of the usable lua standard method, function, table<br/>
     /// This does not provide all of Lua method, some will be removed because it doesn't stable <br/><br/>
     /// Be careful that every method in this use 1-index not 0-index
     /// </summary>
+    /// <remarks>This helper file will replace some lua method with appreciate one in warcraft if it was originally modified by warcraft it self</remarks>
     /// @CSharpLua.Ignore
     public static class Lua
     {
@@ -41,7 +52,7 @@ namespace Source.Shared
         public static extern bool Assert(bool v);
 
         /// <summary>
-        /// Call <see cref="Lua.Error"/> if it <paramref name="v"/> argument is false, otherwise return the argument passed in ei<br/>
+        /// Call <see cref="Lua.Error"/> if it <paramref name="v"/> argument is false, otherwise return the argument passed in v<br/>
         /// In case of error, message is the error object, which is default to "assertion failed!"
         /// </summary>
         /// <param name="v"></param>
@@ -58,7 +69,7 @@ namespace Source.Shared
         public static extern bool Assert(bool v, string message);
 
         /// <summary>
-        /// Call <see cref="Lua.Error"/> if it <paramref name="v"/> argument is false, otherwise return the argument passed in ei<br/>
+        /// Call <see cref="Lua.Error"/> if it <paramref name="v"/> argument is false, otherwise return the argument passed in v<br/>
         /// In case of error, message is the error object, which is default to "assertion failed!"
         /// </summary>
         /// <param name="v"></param>
@@ -356,7 +367,7 @@ namespace Source.Shared
 
         /// <summary>
         /// Receives a <paramref name="value"/> of any type and converts it to a string in a human-readable format. (For complete control of how numbers are converted, use string.format.)<br/>
-        /// If the metatable of v has a __tostring field, then <see cref="ToString(dynamic)"> calls the corresponding value with ei as argument, and uses the result of the call as its result.
+        /// If the metatable of value has a __tostring field, then <see cref="ToString(dynamic)"/> calls the corresponding value with value as argument, and uses the result of the call as its result.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -415,12 +426,437 @@ namespace Source.Shared
         public static extern string Type(object obj);
 
         /// <summary>
-        /// Re-present as an 'end' keyword in lua. DO NOT INTERACT WITH THIS
+        /// This library provides basic mathematical functions. It provides all its functions and constants inside the table math.<br/>
+        /// Functions with the annotation "integer/float" give integer results for integer arguments and float results for float (or mixed) arguments.<br/>
+        /// Rounding functions (math.ceil, math.floor, and math.modf) return an integer when the result fits in the range of an integer, or a float otherwise.
         /// </summary>
-        /// @CSharpLua.Template = "end"
-        public static readonly object End;
+        /// @CSharpLua.Ignore
+        public static class Math
+        {
+            /// <summary>
+            /// The float value HUGE_VAL, a value larger than any other numeric value.
+            /// </summary>
+            /// @CSharpLua.Template = "math.huge"
+            public static readonly float Huge;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "None")]
+            /// <summary>
+            /// An integer with the maximum value for an integer.
+            /// </summary>
+            /// @CSharpLua.Template = "math.maxinteger"
+            public static readonly int MaxInteger;
+
+            /// <summary>
+            /// An integer with the minimum value for an integer.
+            /// </summary>
+            /// @CSharpLua.Template = "math.mininteger"
+            public static readonly int MinInteger;
+
+            /// <summary>
+            /// The value of π.
+            /// </summary>
+            /// @CSharpLua.Template = "math.pi"
+            public static readonly int Pi;
+
+            /// <summary>
+            /// Return the result of x to the power of n
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "{0} ^ {1}"
+            public static extern int Pow(int x, int n);
+
+            /// <summary>
+            /// Return the result of x to the power of n
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "{0} ^ {1}"
+            public static extern float Pow(float x, float n);
+
+            /// <summary>
+            /// Return the result of x to the power of n
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "{0} ^ {1}"
+            public static extern int Pow(int x, float n);
+
+            /// <summary>
+            /// Return the result of x to the power of n
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "{0} ^ {1}"
+            public static extern int Pow(float x, int n);
+
+            /// <summary>
+            /// Return the absolute value of x
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// <remarks>(integer/float)</remarks>
+            /// @CSharpLua.Template = "math.abs({0})"
+            public static extern dynamic Abs(int x);
+
+            /// <summary>
+            /// Return the absolute value of x
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// <remarks>(integer/float)</remarks>
+            /// @CSharpLua.Template = "math.abs({0})"
+            public static extern dynamic Abs(float x);
+
+            /// <summary>
+            /// Return the arc cosine of x (in radians)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.acos({0})"
+            public static extern int Acos(int x);
+
+            /// <summary>
+            /// Return the arc cosine of x (in radians)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.acos({0})"
+            public static extern float Acos(float x);
+
+            /// <summary>
+            /// Return the arc sine of x (in radians)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.asin({0})"
+            public static extern int Asin(int x);
+
+            /// <summary>
+            /// Return the arc sine of x (in radians)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.asin({0})"
+            public static extern float Asin(float x);
+
+            /// <summary>
+            /// Returns the arc tangent of y/x (in radians), but uses the signs of both arguments to find the quadrant of the result. (It also handles correctly the case of x being zero.)
+            /// </summary>
+            /// <param name="y"></param>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.atan({0}, {1})"
+            public static extern int Atan(int y, int x = 1);
+
+            /// <summary>
+            /// Returns the arc tangent of y/x (in radians), but uses the signs of both arguments to find the quadrant of the result. (It also handles correctly the case of x being zero.)
+            /// </summary>
+            /// <param name="y"></param>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.atan({0}, {1})"
+            public static extern float Atan(float y, float x = 1.0f);
+
+            /// <summary>
+            /// Returns the smallest integral value larger than or equal to x.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.ceil({0})"
+            public static extern int Ceil(int x);
+
+            /// <summary>
+            /// Returns the smallest integral value larger than or equal to x.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.ceil({0})"
+            public static extern float Ceil(float x);
+
+            /// <summary>
+            /// Returns the cosine of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.cos({0})"
+            public static extern int Cos(int x);
+
+            /// <summary>
+            /// Returns the cosine of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.cos({0})"
+            public static extern float Cos(float x);
+
+            /// <summary>
+            /// Returns the sine of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.sin({0})"
+            public static extern int Sin(int x);
+
+            /// <summary>
+            /// Returns the sine of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.sin({0})"
+            public static extern float Sin(float x);
+
+            /// <summary>
+            /// Returns the tangent of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.tan({0})"
+            public static extern int Tan(int x);
+
+            /// <summary>
+            /// Returns the tangent of x (assumed to be in radians).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.tan({0})"
+            public static extern float Tan(float x);
+
+            /// <summary>
+            /// Converts the angle x from radians to degrees.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.reg({0})"
+            public static extern int Deg(int x);
+
+            /// <summary>
+            /// Converts the angle x from radians to degrees.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.reg({0})"
+            public static extern float Deg(float x);
+
+            /// <summary>
+            /// Converts the angle x from degrees to radians.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.rad({0})"
+            public static extern int Rad(int x);
+
+            /// <summary>
+            /// Converts the angle x from degrees to radians.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.rad({0})"
+            public static extern float Rad(float x);
+
+            /// <summary>
+            /// Returns the square root of x. (You can also use the expression x^0.5 to compute this value.)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.sqrt({0})"
+            public static extern int Sqrt(int x);
+
+            /// <summary>
+            /// Returns the square root of x. (You can also use the expression x^0.5 to compute this value.)
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.sqrt({0})"
+            public static extern float Sqrt(float x);
+
+            /// <summary>
+            /// Returns the value e to the power of x (where e is the base of natural logarithms).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.exp({0})"
+            public static extern int Exp(int x);
+
+            /// <summary>
+            /// Returns the value e to the power of x (where e is the base of natural logarithms).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.exp({0})"
+            public static extern float Exp(float x);
+
+            /// <summary>
+            /// Returns the largest integral value smaller than or equal to x.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.floor({0})"
+            public static extern int Floor(int x);
+
+            /// <summary>
+            /// Returns the largest integral value smaller than or equal to x.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.floor({0})"
+            public static extern float Floor(float x);
+
+            /// <summary>
+            /// Returns the remainder of the division of x by y that rounds the quotient towards zero.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.fmod({0}, {1})"
+            public static extern dynamic FMod(int x, int y);
+
+            /// <summary>
+            /// Returns the remainder of the division of x by y that rounds the quotient towards zero.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="y"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.fmod({0}, {1})"
+            public static extern dynamic FMod(float x, float y);
+
+            /// <summary>
+            /// Returns the logarithm of x in the given base. The default for base is e (so that the function returns the natural logarithm of x).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="_base"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.log({0}, {1})"
+            public static extern int Log(int x, int? _base);
+
+            /// <summary>
+            /// Returns the logarithm of x in the given base. The default for base is e (so that the function returns the natural logarithm of x).
+            /// </summary>
+            /// <param name="x"></param>
+            /// <param name="_base"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.log({0}, {1})"
+            public static extern float Log(float x, float? _base);
+
+            /// <summary>
+            /// Returns the argument with the maximum value, according to the Lua operator <
+            /// </summary>
+            /// <param name="x"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.max({*0})"
+            public static extern dynamic Max(params int[] x);
+
+            /// <summary>
+            /// Returns the argument with the maximum value, according to the Lua operator <
+            /// </summary>
+            /// <param name="x"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.max({*0})"
+            public static extern dynamic Max(params float[] x);
+
+            /// <summary>
+            /// Returns the argument with the minimum value, according to the Lua operator <
+            /// </summary>
+            /// <param name="x"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.min({*0})"
+            public static extern dynamic Min(params int[] x);
+
+            /// <summary>
+            /// Returns the argument with the minimum value, according to the Lua operator <
+            /// </summary>
+            /// <param name="x"></param>
+            /// <remarks>(integer/float)</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.min({*0})"
+            public static extern dynamic Min(params float[] x);
+
+            /// <summary>
+            /// Returns the integral part of x and the fractional part of x. Its second result is always a float.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.modf({0})"
+            public static extern (int, float) ModF(float x);
+
+            /// <summary>
+            /// returns a pseudo-random float with uniform distribution in the range [0,1)
+            /// </summary>
+            /// <remarks>This method has been modified by warcraft to point to their random implementation, result is generally the same</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "GetRandomReal(0, 1)"
+            public static extern float Random();
+
+            /// <summary>
+            /// returns a pseudo-random integer with uniform distribution in the range [m, n]
+            /// </summary>
+            /// <param name="m"></param>
+            /// <param name="n"></param>
+            /// <remarks>This method has been modified by warcraft to point to their random implementation, result is generally the same</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "GetRandomInt({0}, {1})"
+            public static extern int Random(int m, int n);
+
+            /// <summary>
+            /// like <see cref="Math.Random(int, int)"/> but calling this is equivalent to <code>Math.Random(1, n)</code>
+            /// </summary>
+            /// <param name="n"></param>
+            /// <remarks>This method has been modified by warcraft to point to their random implementation, result is generally the same</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "GetRandomInt(1, {0})"
+            public static extern int Random(int n);
+
+            /// <summary>
+            /// Sets x as the "seed" for the pseudo-random generator: equal seeds produce equal sequences of numbers.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <remarks>This method has been modified by warcraft to point to their random implementation, result is generally the same</remarks>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "SetRandomSeed({0})"
+            public static extern void RandomSeed(int x);
+
+            /// <summary>
+            /// If the value x is convertible to an integer, returns that integer. Otherwise, returns nil.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.tointeger({0})"
+            public static extern int? ToInt(float x);
+
+            /// <summary>
+            /// If the value x is convertible to an integer, returns that integer. Otherwise, returns nil.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.tointeger({0})"
+            public static extern int? ToInt(double x);
+
+            /// <summary>
+            /// Returns a boolean, true if and only if integer m is below integer n when they are compared as unsigned integers.
+            /// </summary>
+            /// <param name="m"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.ult({0}, {1})"
+            public static extern bool Ult(int m, int n);
+
+            /// <summary>
+            /// Returns "integer" if x is an integer, "float" if it is a float, or nil if x is not a number.
+            /// </summary>
+            /// <param name="x"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "math.type({0})"
+            public static extern string? Type(dynamic x);
+        }
+
         /// @CSharpLua.Ignore
         public interface IMetatables
         {
@@ -470,7 +906,7 @@ namespace Source.Shared
         }
 
         /// <summary>
-        /// A Lua table, this used for type-casting!
+        /// Lua table!!, but with csharp type-strict (only a portion)
         /// </summary>
         /// @CSharpLua.Ignore
         public sealed class Table
@@ -502,6 +938,7 @@ namespace Source.Shared
             /// <param name="value"></param>
             /// @CSharpLua.Template = "{this}[{0}] = {1}"
             public extern void Set<TVal>(dynamic key, TVal value);
+
 
             /// <summary>
             /// Create a lua table

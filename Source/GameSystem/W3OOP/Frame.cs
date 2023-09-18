@@ -1,11 +1,27 @@
-﻿using Source.Shared;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="Frame.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using Source.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Text;
 using static War3Api.Common;
 
-namespace Source.GameSystem.WCObject
+namespace Source.GameSystem.W3OOP
 {
 #pragma warning disable CS0824 // Constructor is marked external
 #pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
@@ -428,6 +444,10 @@ namespace Source.GameSystem.WCObject
 
         #region frame value management
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Ignore
         public sealed class TextAlignment
         {
             private TextAlignment() { }
@@ -678,10 +698,21 @@ namespace Source.GameSystem.WCObject
         /// @CSharpLua.Template = "BlzFrameGetHeight({this})"
         public extern float GetHeight();
 
+        /// <summary>
+        /// Get is the frame visible or not (ASYNC)
+        /// </summary>
+        /// <returns></returns>
+        /// @CSharpLua.Template = "BlzFrameIsVisible({this})"
+        public extern bool IsVisible();
+
         #endregion
 
         #region frame trigger management
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Ignore
         public sealed class Event
         {
             private Event() { }

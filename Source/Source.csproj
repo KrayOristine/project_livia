@@ -26,7 +26,4 @@
 		<PackageReference Include="WCSharp.Shared" Version="2.1.4" />
 		<PackageReference Include="WCSharp.Sync" Version="2.1.2" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="GameSystem\UI\" />
-	</ItemGroup>
 </Project>

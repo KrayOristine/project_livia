@@ -1,9 +1,26 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="Trigger.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Text;
 using static War3Api.Common;
 
-namespace Source.GameSystem.WCObject
+namespace Source.GameSystem.W3OOP
 {
 #pragma warning disable CS0824 // Constructor is marked external
 #pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
@@ -36,6 +53,73 @@ namespace Source.GameSystem.WCObject
         /// </summary>
         /// @CSharpLua.Template = "ResetTrigger({this})"
         public extern void Reset();
+
+        /// <summary>
+        /// Disable this trigger from being executed from event it registered but still allow <see cref="Execute"/> and <see cref="Evaluate"/> to work
+        /// </summary>
+        /// @CSharpLua.Template = "DisableTrigger({this})"
+        public extern void Disable();
+
+        /// <summary>
+        /// Enable this trigger to being able to fired from registered event
+        /// </summary>
+        /// @CSharpLua.Template = "EnableTrigger({this})"
+        public extern void Enable();
+
+        /// <summary>
+        /// Get the current status of the trigger
+        /// </summary>
+        /// @CSharpLua.Template = "IsTriggerEnabled({this})"
+        public readonly bool IsEnabled;
+
+        /// <summary>
+        /// Get the attribute flag this flag indicate that this trigger will wait for sleep action
+        /// </summary>
+        /// @CSharpLua.Template = "IsTriggerWaitOnSleeps({this})"
+        public readonly bool IsAllowedToWait;
+
+        /// <summary>
+        /// Allow this trigger to wait for sleep action?
+        /// </summary>
+        /// <param name="flag"></param>
+        /// @CSharpLua.Template = "TriggerWaitOnSleeps({this}, {0})"
+        public extern void WaitOnSleeps(bool flag);
+
+        /// <summary>
+        /// Makes a trigger execution sleep for a given duration. The thread will yield so other threads can do their work.
+        /// </summary>
+        /// <remarks>
+        /// <list type="bullet">
+        ///      <item>
+        ///      This works only in a trigger action execution context, not in trigger conditions nor for example in timer functions or `ForGroup` functions.However, it also works in `<see cref="Execute"/>` contexts, even if the `<see cref="Execute"/>` call is not in a trigger action execution context.
+        ///      </item>
+        ///      <item>
+        ///      This has many implications, see other trigger-related natives.
+        ///      </item>
+        ///      <item>
+        ///      This ticks while the game was paused with the `<see cref="PauseGame(bool)"/>` native, unlike timers.
+        ///      </item>
+        ///      <item>
+        ///      This does not tick while the game was paused by the user, neither in single-player nor in multi-player. (But the Trigger Editor of the World Editor denotes it as a real-time wait. Is this a bug?)
+        ///      </item>
+        ///      <item>
+        ///      This ticks independently from game speed, i.e., in Fast mode, it will be about the same as a game time, in Normal mode, it will be about 25% faster than game time and in Slow mode, it will be about 67% faster than game time, see table below.<br/>
+        ///      Game speed | TSA speed (%) | game speed (%)<br/>
+        ///      ------------|---------------|---------------<br/>
+        ///      Fast        | 100%          | 100%<br/>
+        ///      Normal      | 100%          | 80%<br/>
+        ///      Slow        | 100%          | 60%<br/><br/>
+        ///      Example elapsed game time after TSA with timeout = 30:<br/>
+        ///      Game speed | game time elapsed<br/>
+        ///      -----------|------------------<br/>
+        ///      Fast       | 30s<br/>
+        ///      Normal     | 24s<br/>
+        ///      Slow       | 18s
+        ///      </item>
+        /// </list>
+        /// </remarks>
+        /// @CSharpLua.Template = "TriggerSleepAction({this}, {0})"
+        public extern void Sleep(float timeout);
 
         /// <summary>
         /// Get how many times this trigger has evaluated.

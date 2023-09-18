@@ -1,4 +1,21 @@
-﻿/*
+﻿// ------------------------------------------------------------------------------
+// <copyright file="DamageTypes.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+
+/*
     Warcraft 3 C# Damage Engine
     This was made by converting Bribe Damage Engine from Lua and JASS into C#
     This converted version includes minor changes to the engine to optimize it
@@ -26,6 +43,10 @@ namespace Source.GameSystem.Damage
         /// Is magical
         /// </summary>
         Magical,
+        /// <summary>
+        /// The one that benefit both physical and magical at the same time
+        /// </summary>
+        Astral,
         /// <summary>
         /// Is a pure damage<br/><br/>
         /// Bypass armor and damage reduction but not other damage modification
