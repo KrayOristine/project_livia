@@ -385,13 +385,8 @@ FodyWeavers.xsd
 *.pem
 *.rsa
 
-# Ignore Map Resources
+# Ignore Map Resources (to prevent killing the git repo on push)
 Resources/
 Assets/
 Artifacts/
-Launcher/*
-/Launcher/Program.cs
-/Launcher/Launcher.csproj
-/Launcher/app.config
-/Source/Source.licenseheader
-/Launcher/app.config.json
+/Launcher/test.txt
