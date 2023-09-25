@@ -22,7 +22,7 @@
 		<PackageReference Include="WCSharp.Lightnings" Version="2.1.0" />
 		<PackageReference Include="WCSharp.Missiles" Version="2.1.2" />
 		<PackageReference Include="WCSharp.SaveLoad" Version="2.1.8" />
-		<PackageReference Include="WCSharp.Shared" Version="2.1.3" />
+		<PackageReference Include="WCSharp.Shared" Version="2.2.0" />
 		<PackageReference Include="WCSharp.Sync" Version="2.1.2" />
 	</ItemGroup>
 </Project>
