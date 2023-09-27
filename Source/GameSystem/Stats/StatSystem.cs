@@ -14,12 +14,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
+using Source.Shared;
 using System;
 using System.Collections.Generic;
 using static War3Api.Common;
 
 // Shorthand for Update, since i lazy as fuck
-using UpdateAction = System.Action<War3Api.Common.unit, double, double, Source.GameSystem.Stats.ModifyMode>;
+using UpdateAction = System.Action<War3Api.Common.unit, float, float, Source.GameSystem.Stats.ModifyMode>;
 
 namespace Source.GameSystem.Stats
 {
@@ -28,8 +29,8 @@ namespace Source.GameSystem.Stats
     /// </summary>
     static class StatSystem
     {
-        private static readonly List<Dictionary<unit, double>> Base = new();
-        private static readonly List<Dictionary<unit, double>> Bonus = new();
+        private static readonly List<Dictionary<unit, float>> Base = new();
+        private static readonly List<Dictionary<unit, float>> Bonus = new();
         private static readonly List<string> Name = new();
         private static readonly List<bool> IsFloat = new();
         private static readonly List<UpdateAction> OnUpdate = new();
@@ -42,7 +43,7 @@ namespace Source.GameSystem.Stats
         /// <param name="name">The name of the stats</param>
         /// <param name="isPercent">Is the stats used as percentage?</param>
         /// <param name="onUpdateAction">A method that will invoke every time the user made edit to the stats<br/> This method take args as in order below
-        /// <code>(<see cref="unit"/> target, <see langword="double"/> oldValue, <see langword="double"/> newValue, <see cref="ModifyMode"/> mode)</code>
+        /// <code>(<see cref="unit"/> target, <see langword="float"/> oldValue, <see langword="float"/> newValue, <see cref="ModifyMode"/> mode)</code>
         /// </param>
         /// <returns>The id number of the stats in run-time</returns>
         public static int Create(string name, bool isPercent, UpdateAction onUpdateAction)
@@ -63,7 +64,7 @@ namespace Source.GameSystem.Stats
         /// <param name="name">New name of the stats</param>
         /// <param name="percentFlag">Is it percent?</param>
         /// <param name="onUpdate">New update method that take args as in order below
-        /// <code>(<see cref="unit"/> target, <see langword="double"/> oldValue, <see langword="double"/> newValue, <see cref="ModifyMode"/> mode)</code>
+        /// <code>(<see cref="unit"/> target, <see langword="float"/> oldValue, <see langword="float"/> newValue, <see cref="ModifyMode"/> mode)</code>
         /// </param>
         /// <param name="useHook"><see langword="true"/> to hooks the update action instead of editing the entire stats instance</param>
         public static void Override(StatType id, string name, bool percentFlag, UpdateAction onUpdate, bool useHook = false)
@@ -105,7 +106,7 @@ namespace Source.GameSystem.Stats
         /// <param name="u">The target unit stats</param>
         /// <param name="mode">Stat mode - based on the value</param>
         /// <returns>The stats that the unit has</returns>
-        public static double Get(StatType id, unit u, ModifyMode mode)
+        public static float Get(StatType id, unit u, ModifyMode mode)
         {
             switch (mode)
             {
@@ -114,7 +115,7 @@ namespace Source.GameSystem.Stats
                 case ModifyMode.BONUS:
                     return Bonus[(int)id].ContainsKey(u) ? Bonus[(int)id][u] : 0;
                 case ModifyMode.TOTAL:
-                    double total = 0;
+                    float total = 0;
                     total += Base[(int)id].ContainsKey(u) ? Base[(int)id][u] : 0;
                     total += Bonus[(int)id].ContainsKey(u) ? Bonus[(int)id][u] : 0;
                     return total;
@@ -131,9 +132,9 @@ namespace Source.GameSystem.Stats
         /// <param name="u">The target unit stats</param>
         /// <param name="mode">Stat mode - If use TOTAL, it will be divided into base and bonus but may cause incorrect amount of stats due to rounding</param>
         /// <param name="newValue">The new value of the stats</param>
-        public static void Set(StatType id, unit u, ModifyMode mode, double newValue)
+        public static void Set(StatType id, unit u, ModifyMode mode, float newValue)
         {
-            double old;
+            float old;
             switch (mode)
             {
                 case ModifyMode.BASE:
@@ -147,7 +148,7 @@ namespace Source.GameSystem.Stats
                     OnUpdate[(int)id].Invoke(u, old, newValue, mode);
                     return;
                 case ModifyMode.TOTAL:
-                    double divided = Math.Ceiling(newValue / 2);
+                    float divided = Lua.Math.Ceil(newValue / 2);
                     old = Base[(int)id].ContainsKey(u) ? Base[(int)id][u] : 0;
                     Base[(int)id][u] = divided;
                     OnUpdate[(int)id].Invoke(u, old, divided, ModifyMode.BASE);
@@ -167,10 +168,10 @@ namespace Source.GameSystem.Stats
         /// <param name="u">The target unit stats</param>
         /// <param name="mode">Stat mode - If use TOTAL, it will be divided into base and bonus but may cause incorrect amount of stats due to rounding</param>
         /// <param name="amount">The amount that will be added</param>
-        public static void Add(StatType id, unit u, ModifyMode mode, double amount)
+        public static void Add(StatType id, unit u, ModifyMode mode, float amount)
         {
-            double old;
-            double newVal;
+            float old;
+            float newVal;
             switch (mode)
             {
                 case ModifyMode.BASE:
@@ -186,7 +187,7 @@ namespace Source.GameSystem.Stats
                     OnUpdate[(int)id].Invoke(u, old, newVal, mode);
                     return;
                 case ModifyMode.TOTAL:
-                    double divided = Math.Ceiling(amount / 2);
+                    float divided = Lua.Math.Ceil(amount / 2);
                     old = Base[(int)id].ContainsKey(u) ? Base[(int)id][u] : 0;
                     newVal = old + divided;
                     Base[(int)id][u] = newVal;
@@ -209,10 +210,10 @@ namespace Source.GameSystem.Stats
         /// <param name="u">The target unit stats</param>
         /// <param name="mode">Stat mode - If use TOTAL, it will be divided into base and bonus but may cause incorrect amount of stats due to rounding</param>
         /// <param name="amount">The amount that will be added</param>
-        public static void Sub(StatType id, unit u, ModifyMode mode, double amount)
+        public static void Sub(StatType id, unit u, ModifyMode mode, float amount)
         {
-            double old;
-            double newVal;
+            float old;
+            float newVal;
             switch (mode)
             {
                 case ModifyMode.BASE:
@@ -228,7 +229,7 @@ namespace Source.GameSystem.Stats
                     OnUpdate[(int)id].Invoke(u, old, newVal, mode);
                     return;
                 case ModifyMode.TOTAL:
-                    double divided = Math.Ceiling(amount / 2);
+                    float divided = Lua.Math.Ceil(amount / 2);
                     old = Base[(int)id].ContainsKey(u) ? Base[(int)id][u] : 0;
                     newVal = old - divided;
                     Base[(int)id][u] = newVal;

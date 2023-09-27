@@ -107,14 +107,14 @@ namespace Source.Shared
             Common.GroupEnumUnitsInRect(g, r, filter);
         }
 
-        public static void EXGroupEnumUnitInRange(Common.group g, float x, float y, float radius, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitInRange(Common.group g, float x, float y, float radius, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 
             Common.GroupEnumUnitsInRange(g, x, y, radius, filter);
         }
 
-        public static void EXGroupEnumUnitInRangeOfLoc(Common.group g, Common.location l, float radius, Common.boolexpr? filter, bool wantDestroy = false)
+        public static void EXGroupEnumUnitInRangeOfLoc(Common.group g, Common.location l, float radius, Common.boolexpr? filter = null, bool wantDestroy = false)
         {
             float x = l == null ? 0 : Common.GetLocationX(l);
             float y = l == null ? 0 : Common.GetLocationY(l);
@@ -124,14 +124,14 @@ namespace Source.Shared
             if (wantDestroy) Common.RemoveLocation(l);
         }
 
-        public static void EXGroupEnumUnitOfPlayer(Common.group g, Common.player p, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitOfPlayer(Common.group g, Common.player p, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 
             Common.GroupEnumUnitsOfPlayer(g, p, filter);
         }
 
-        public static void EXGroupEnumUnitSelected(Common.group g, Common.player p, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitSelected(Common.group g, Common.player p, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 

@@ -38,7 +38,11 @@ namespace Source.GameSystem.Damage
         public float Damage;
         public bool IsAttack;
         public bool IsRanged;
+
+        //TODO: Make this become bit field
         public List<bool> Flags;
+        //!---------------------------------
+
         public attacktype AttackType;
         public damagetype DamageType;
         public weapontype WeaponType;
@@ -49,7 +53,7 @@ namespace Source.GameSystem.Damage
         internal DamageTrigger? recursive;
         public bool IsEmpty;
 
-        //* Internal cache
+        //! Internal cache
         private static readonly Stack<DamageInstance> cache = new();
 
         public unit Source

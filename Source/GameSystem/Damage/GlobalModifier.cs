@@ -130,21 +130,14 @@ namespace Source.GameSystem.Damage
         }
 
 
-        private static readonly LinkedListNode<DamageTrigger> t1;
-        private static readonly LinkedListNode<DamageTrigger> t2;
-        private static readonly LinkedListNode<DamageTrigger> t3;
-        private static readonly LinkedListNode<DamageTrigger> t4;
-        private static readonly LinkedListNode<DamageTrigger> t5;
-        private static readonly LinkedListNode<DamageTrigger> t6;
-
-        static GlobalModifier() {
-            t1 = Engine.Register(DamageEvent.DAMAGE, 0, OnDamage);
-            t2 = Engine.Register(DamageEvent.ARMOR, 0, OnDamaged);
-            t3 = Engine.Register(DamageEvent.DAMAGED, 0, OnDamaged);
-            t4 = Engine.Register(DamageEvent.AFTER, 0, AfterDamaged);
-            t5 = Engine.Register(DamageEvent.LETHAL, 0, AOEDamaged);
-            t6 = Engine.Register(DamageEvent.LETHAL, 0, LethalDamaged);
-        }
+#pragma warning disable S1144 // Unused private types or members should be removed
+        private static readonly LinkedListNode<DamageTrigger> t1 = Engine.Register(DamageEvent.DAMAGE, 0, OnDamage);
+        private static readonly LinkedListNode<DamageTrigger> t2 = Engine.Register(DamageEvent.ARMOR, 0, OnDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t3 = Engine.Register(DamageEvent.DAMAGED, 0, OnDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t4 = Engine.Register(DamageEvent.AFTER, 0, AfterDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t5 = Engine.Register(DamageEvent.LETHAL, 0, AOEDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t6 = Engine.Register(DamageEvent.LETHAL, 0, LethalDamaged);
+#pragma warning restore S1144 // Unused private types or members should be removed
 
         public static void OnDamage()
         {

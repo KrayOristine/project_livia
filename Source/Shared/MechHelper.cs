@@ -286,7 +286,7 @@ namespace Source.Shared
     {
         private static readonly Dictionary<unit, int> activeDict = new();
         private static readonly Stack<DisarmSystem> cache = new();
-        private static readonly PeriodicDisposableTrigger<DisarmSystem> trigger = new(1 / 32f);
+        private static readonly PeriodicDisposableTrigger<DisarmSystem> trigger = new(0.03125f);
         private static readonly Dictionary<unit, DisarmSystem> disarmLoops = new();
 
         public DisarmSystem(unit target)
@@ -313,7 +313,7 @@ namespace Source.Shared
                 return;
             }
 
-            Duration -= 1 / 32f;
+            Duration -= 0.03125f;
         }
 
         public static DisarmSystem GetCache(unit u)

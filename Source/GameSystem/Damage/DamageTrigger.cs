@@ -17,22 +17,23 @@
 using System;
 using System.Collections.Generic;
 
-/*
-    Warcraft 3 C# Damage Engine
-    This was made by converting Bribe Damage Engine from Lua and JASS into C#
-    This converted version includes minor changes to the engine to optimize it
-
-    Current Version: 1.0
- */
-
 namespace Source.GameSystem.Damage
 {
     public sealed class DamageTrigger
     {
         public Action trig;
+        /// <summary>
+        /// Indicate this trigger is frozen, will not executed anymore
+        /// </summary>
         public bool isFrozen;
-        public bool isInception;
-        public int sleepDepth;
+        /// <summary>
+        /// Set this to true to allow this trigger instance to dream
+        /// </summary>
+        public bool allowInception;
+        /// <summary>
+        /// How deep is this trigger instance has slept for
+        /// </summary>
+        public int InceptionFloor;
         public int weight;
         public int minAOE;
         public bool isEmpty = false;
@@ -44,8 +45,8 @@ namespace Source.GameSystem.Damage
             trig = func;
             weight = priority;
             isFrozen = false;
-            isInception = false;
-            sleepDepth = 0;
+            allowInception = false;
+            InceptionFloor = 0;
             minAOE = 1;
             isEmpty = false;
         }
@@ -55,8 +56,8 @@ namespace Source.GameSystem.Damage
             trigger.trig = method;
             trigger.weight = priority;
             trigger.isFrozen = false;
-            trigger.isInception = false;
-            trigger.sleepDepth = 0;
+            trigger.allowInception = false;
+            trigger.InceptionFloor = 0;
             trigger.minAOE = 1;
             trigger.isEmpty = false;
         }

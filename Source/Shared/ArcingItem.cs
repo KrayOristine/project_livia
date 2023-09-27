@@ -28,6 +28,8 @@ namespace Source.Shared
 
         //! MODIFY BELOW CODE AT YOUR OWN RISK
 
+        private const float SPEED_CONVERT = TRAVEL_TIME / PeriodicEvents.SYSTEM_INTERVAL;
+
         private static readonly PeriodicTrigger<ArcingItem> trigger = new(PeriodicEvents.SYSTEM_INTERVAL);
         private static readonly Stack<ArcingItem> cache = new();
 
@@ -81,7 +83,7 @@ namespace Source.Shared
             angle = WCSharp.Shared.Util.AngleBetweenPointsRad(x1, y1, x2, y2);
             distance = WCSharp.Shared.FastUtil.DistanceBetweenPoints(x1, y1, x2, y2);
             maxDistance = distance;
-            speed = distance / (TRAVEL_TIME / PeriodicEvents.SYSTEM_INTERVAL);
+            speed = distance / SPEED_CONVERT;
             arc = distance * CONVERT_ARC;
 
             return this;

@@ -14,20 +14,40 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
+using System.Collections.Generic;
 using War3Api;
-
-/*
- * Ozzzzymaniac Custom Save/Load
- *
- * This is the core function of the maps
- */
 
 namespace Source.GameSystem.Save
 {
-    public class HeroBank : Saveable
+    public sealed class HeroBank : Saveable
     {
-        internal HeroBank(Common.player player, int slot) : base(player, slot)
+        public int ID { get; private set; } = 0;
+        public int Level { get; set; } = 0;
+        /// <summary>
+        /// No use, but leave it here for future case
+        /// </summary>
+        public string Name { get; private set; } = string.Empty;
+        /// <summary>
+        /// Only modify the list, do not create a new list
+        /// </summary>
+        public List<float> Attribute { get; set; } = new()
+;        /// <summary>
+        /// Only modify the list, do not create a new list
+        /// </summary>
+        public List<bool> Flags { get; set; } = new();
+        /// <summary>
+        /// The id of the item at the specific slot
+        /// </summary>
+        public InventoryBank Inventory { get; set; }
+        /// <summary>
+        /// The save code of this bank
+        /// </summary>
+        public string SaveCode { get; private set; } = string.Empty;
+
+
+        public HeroBank(Common.player player, int slot) : base(player, slot)
         {
+            Inventory = new InventoryBank(player, slot);
         }
     }
 }

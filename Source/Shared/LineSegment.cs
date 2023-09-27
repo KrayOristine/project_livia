@@ -23,8 +23,8 @@ namespace Source.Shared
 {
     public static class LineSegment
     {
-        private static rect r = Rect(0, 0, 0, 0);
-        private static group g = CreateGroup();
+        private static readonly rect r = Rect(0, 0, 0, 0);
+        private static readonly group g = CreateGroup();
 
         private static float ox = 0f;
         private static float oy = 0f;
@@ -44,7 +44,7 @@ namespace Source.Shared
             float dy = 0.5f * (by - ay);
 
             // Get half of the rectangle length and height
-            da = (float)Math.Sqrt(dx * dx + dy * dy);
+            da = Lua.Math.Sqrt(dx * dx + dy * dy);
             db = offset;
 
             // Get unit vector of the major axis
@@ -89,65 +89,65 @@ namespace Source.Shared
             return dx * dx <= da * da && dy * dy <= db * db;
         }
 
-        private static readonly List<widget> lastEnums = new();
+        private static readonly List<widget> lastEnum = new();
 
-        public static List<widget> LastEnums { get => lastEnums; }
+        public static List<widget> LastEnum { get => lastEnum; }
 
-        public static List<widget> EnumsUnit(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumUnit(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
             Prepare(minX, minY, maxX, maxY, offset);
             WarEX.EXGroupEnumUnitInRect(g, r, null);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             for (int i = 0; i < BlzGroupGetSize(g); i++)
             {
                 unit u = BlzGroupUnitAt(g, i);
                 if (ContainWidget(u, checkCollision ? BlzGetUnitCollisionSize(u) : 0.0f))
                 {
-                    lastEnums.Add(u);
+                    lastEnum.Add(u);
                 }
             }
             GroupClear(g);
 
-            return lastEnums;
+            return lastEnum;
         }
 
         private static bool DestructableFilter()
         {
             destructable d = GetFilterDestructable();
-            if (ContainWidget(d, 0.0f)) lastEnums.Add(d);
+            if (ContainWidget(d, 0.0f)) lastEnum.Add(d);
             return false;
         }
 
-        public static List<widget> EnumsDestructable(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumDestructable(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
             Prepare(minX, minY, maxX, maxY, offset);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             var f = Filter(DestructableFilter);
             EnumDestructablesInRect(r, f, DoNothing);
             DestroyBoolExpr(f);
 
-            return lastEnums;
+            return lastEnum;
         }
 
         private static bool ItemFilter()
         {
             item itm = GetFilterItem();
-            if (ContainWidget(itm, 0.0f)) lastEnums.Add(itm);
+            if (ContainWidget(itm, 0.0f)) lastEnum.Add(itm);
             return false;
         }
 
-        public static List<widget> EnumsItem(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumItem(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
             Prepare(minX, minY, maxX, maxY, offset);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             var f = Filter(ItemFilter);
             EnumItemsInRect(r, f, DoNothing);
             DestroyBoolExpr(f);
 
-            return lastEnums;
+            return lastEnum;
         }
     }
 }

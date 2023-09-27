@@ -32,7 +32,6 @@ namespace Source.Shared
         private const int Z_OFFSET = 70; // Height above unit
         private const int Z_OFFSET_BON = 50; // How much extra height the text gains
         private const int VELOCITY = 4; //  How fast the text moves in x/y plane
-        private const float ANGLE = bj_PI / 2; // Movement angle of the text (only if ANGLE_RND is false)
 
         private static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
         private static readonly Stack<ArcingTT> cache = new();
@@ -103,7 +102,7 @@ namespace Source.Shared
             p ??= GetLocalPlayer();
 
             float a = GetRandomReal(0, 2 * bj_PI);
-            float time = Math.Max(duration, 0.001f);
+            float time = duration > 0.001f ? duration : 0.001f;
             float life = TIME_LIFE * time;
             float angleSin = Sin(a) * VELOCITY;
             float angleCos = Cos(a) * VELOCITY;

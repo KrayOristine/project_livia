@@ -220,35 +220,38 @@ namespace Source.MapScript
         private static void OnChatEvent()
         {
             string chat = GetEventPlayerChatString();
-            string mode = chat.ToLower()[9..];
+            string[] args = chat.ToLower()[9..].Split(' ');
             player p = GetTriggerPlayer();
             int id = GetPlayerId(p);
 
-            if (string.IsNullOrEmpty(mode)) return;
+            foreach (string arg in args)
+            {
+                if (string.IsNullOrEmpty(arg)) continue;
 
-            if (mode == "stack" || mode == "stacking" || mode == "merge" || mode == "merging")
-            {
-                enabled[id] = 2;
-                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been enabled");
-				return;
-            }
-            else if (mode == "no stack" || mode == "no stacking" || mode == "no merge" || mode == "no merging")
-            {
-                enabled[id] = 1;
-                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been disabled");
-				return;
-            }
+                if (arg == "stack" || arg == "stacking" || arg == "merge" || arg == "merging")
+                {
+                    enabled[id] = 2;
+                    DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been enabled");
+                    continue;
+                }
+                else if (arg == "no stack" || arg == "no stacking" || arg == "no merge" || arg == "no merging")
+                {
+                    enabled[id] = 1;
+                    DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags merging has been disabled");
+                    continue;
+                }
 
-            if (mode == "enable")
-            {
-                disabled[id] = false;
-                enabled[id] = 1;
-                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is enabled");
-            }
-            else if (mode == "disable")
-            {
-                disabled[id] = true;
-                DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is disabled");
+                if (arg  == "enable")
+                {
+                    disabled[id] = false;
+                    enabled[id] = 1;
+                    DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is enabled");
+                }
+                else if (arg == "disable")
+                {
+                    disabled[id] = true;
+                    DisplayTimedTextToPlayer(p, 0.2f, 0.5f, 10, "Floating damage tags is disabled");
+                }
             }
         }
 

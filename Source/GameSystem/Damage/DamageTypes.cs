@@ -15,14 +15,6 @@
 // </copyright>
 // ------------------------------------------------------------------------------
 
-/*
-    Warcraft 3 C# Damage Engine
-    This was made by converting Bribe Damage Engine from Lua and JASS into C#
-    This converted version includes minor changes to the engine to optimize it
-
-    Current Version: 1.0
- */
-
 namespace Source.GameSystem.Damage
 {
     /// <summary>

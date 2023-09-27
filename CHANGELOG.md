@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.3
+
+- Major changes to map compiler, transpiler
+- Added credit for people who helped me on the way of making this map (probably grow more as time goes on
+
 ## 0.0.2.a
 
 - Minor changes to map compiler & transpiler
