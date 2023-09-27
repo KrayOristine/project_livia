@@ -1,10 +1,29 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="Color.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+
+// Ignore Spelling: lhs rhs argb
+
+using System;
 using System.Text;
 
 namespace Source.Shared
 {
     /// <summary>
-    /// Alternative for C# System.Drawing Color class<br/>
+    /// Alternative for C# GameSystem.Drawing Color class<br/>
     ///
     /// Will try the best way to replicate the way Color works<br/>
     ///
@@ -17,7 +36,14 @@ namespace Source.Shared
         private readonly byte green;
         private readonly byte blue;
 
-        private Color(byte alpha, byte red, byte green, byte blue)
+        /// <summary>
+        /// Create this class and bypass argument checking (if you know what you're doing)
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="red"></param>
+        /// <param name="green"></param>
+        /// <param name="blue"></param>
+        public Color(byte alpha, byte red, byte green, byte blue)
         {
             this.alpha = alpha;
             this.red = red;
@@ -136,7 +162,7 @@ namespace Source.Shared
         /// Get back the hexadecimal re-presentation of the ARGB color ranges
         /// </summary>
         /// <returns>A hex string re-present ARGB color ranges</returns>
-        public string ToArgbHex()
+        public string ToArgbString()
         {
             return $"{alpha:X2}{red:X2}{green:X2}{blue:X2}";
         }
@@ -149,7 +175,7 @@ namespace Source.Shared
         /// <param name="green">Color green value</param>
         /// <param name="blue">Color blue value</param>
         /// <returns>A string re-presenting ARGB color ranges in hex</returns>
-        public static string ToArgbHex(int alpha, int red, int green, int blue)
+        public static string ToArgbString(int alpha, int red, int green, int blue)
         {
             return $"{alpha:X2}{red:X2}{green:X2}{blue:X2}";
         }
@@ -163,7 +189,7 @@ namespace Source.Shared
         /// <param name="green">Color green value</param>
         /// <param name="blue">Color blue value</param>
         /// <returns>A warcraft color codes</returns>
-        public string ToWarcraftColorCode()
+        public string ToWarcraftColor()
         {
             return $"|c{alpha:X2}{red:X2}{green:X2}{blue:X2}";
         }
@@ -177,7 +203,7 @@ namespace Source.Shared
         /// <param name="green">Color green value</param>
         /// <param name="blue">Color blue value</param>
         /// <returns>A warcraft color codes</returns>
-        public static string ToWarcraftColorCode(int alpha, int red, int green, int blue)
+        public static string ToWarcraftColor(int alpha, int red, int green, int blue)
         {
             return $"|c{alpha:X2}{red:X2}{green:X2}{blue:X2}";
         }
@@ -222,7 +248,7 @@ namespace Source.Shared
             StringBuilder result = new();
             for (int i = 0; i  < gradient.Length; i++)
             {
-                string colorHex = gradient[i].ToArgbHex();
+                string colorHex = gradient[i].ToArgbString();
                 result.Append("|c").Append(colorHex).Append(str[i]).Append("|r");
             }
 
@@ -251,7 +277,7 @@ namespace Source.Shared
             StringBuilder result = new();
             for (int i = 0; i < length; i++)
             {
-                string colorHex = ToArgbHex(startA + (stepA * i), startR + (stepR * i), startG + (stepG * i), stepB + (stepB * i));
+                string colorHex = ToArgbString(startA + (stepA * i), startR + (stepR * i), startG + (stepG * i), stepB + (stepB * i));
                 result.Append("|c").Append(colorHex).Append(str[i]).Append("|r");
             }
 

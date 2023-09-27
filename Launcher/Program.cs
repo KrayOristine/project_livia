@@ -1,158 +1,127 @@
 ﻿using CSharpLua;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Security.Cryptography;
 using War3Net.Build;
 using War3Net.Build.Extensions;
 using War3Net.IO.Mpq;
+using War3Net.IO.Compression;
+using War3Net.IO.Slk;
 using WCSharp.ConstantGenerator;
+using Jering.Javascript.NodeJS;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using LibZopfliSharp;
+using War3Net.Common.Extensions;
 
 namespace Launcher
 {
     internal static class Program
     {
-        // Input
-        private const string SOURCE_CODE_PROJECT_FOLDER_PATH = @"..\..\..\..\Source";
-        private const string ASSETS_FOLDER_PATH = @"..\..\..\..\Assets\";
-        private const string BASE_MAP_NAME = "source.w3x";
-        private const string BASE_MAP_PATH = @"..\..\..\..\Resources\BaseMap\" + BASE_MAP_NAME;
-
-        // Output
-        private const string OUTPUT_FOLDER_PATH = @"..\..\..\..\Artifacts";
-        private const string OUTPUT_SCRIPT_NAME = @"war3map.lua";
-        private const string OUTPUT_MAP_NAME = @"target.w3x";
 
         // Warcraft III
-        private const string GRAPHICS_API = "Direct3D9";
-        private const bool PAUSE_GAME_ON_LOSE_FOCUS = false;
-#if DEBUG
-        private const bool DEBUG = true;
-#else
-		private const bool DEBUG = false;
-#endif
+        public const string GRAPHICS_API = "Direct3D9";
 
         private static void Main()
         {
-            Console.WriteLine("The following actions are available:");
-            Console.WriteLine("1. Generate constants");
-            Console.WriteLine("2. Compile map");
-            Console.WriteLine("3. Compile and run map");
-            MakeDecision();
+            string original = "uabc";
+            int drakeFourCC = original.FromRawcode();
+            int myFourCC = original.FromRawCodeEx();
+            string drakeStrCC1 = drakeFourCC.ToRawcode();
+            string drakeStrCC2 = drakeFourCC.ToRawCodeEx();
+            string myStrCC1 = myFourCC.ToRawcode();
+            string myStrCC2 = myFourCC.ToRawCodeEx();
+
+            Console.WriteLine("Original: " + original);
+            Console.WriteLine("Drake Conversion 4CC to int: " + drakeFourCC);
+            Console.WriteLine("Mine Conversion 4CC to int: " + myFourCC);
+            Console.WriteLine("Drake Conversion int to 4CC variant drake: " + drakeStrCC1);
+            Console.WriteLine("Drake Conversion int to 4CC variant mine: " + drakeStrCC2);
+            Console.WriteLine("Mine Conversion int to 4CC variant drake: " + myStrCC1);
+            Console.WriteLine("Mine Conversion int to 4CC variant mine: " + myStrCC2);
+            //MakeDecision();
         }
 
         private static void MakeDecision()
         {
+            Console.WriteLine("The following actions are available:");
+            Console.WriteLine("1. Generate constants");
+            Console.WriteLine("2. Run ObjectMerger");
+            Console.WriteLine("3. Compile map");
+            Console.WriteLine("4. Compile & Run map");
+            Console.WriteLine("5. Compile without ObjectMerger");
+            Console.WriteLine("6. Compile & Run without ObjectMerger");
             Console.Write("Please type the number of your desired action: ");
             switch (Console.ReadKey().Key)
             {
                 case ConsoleKey.NumPad1:
                 case ConsoleKey.D1:
-                    ConstantGenerator.Run(BASE_MAP_PATH, SOURCE_CODE_PROJECT_FOLDER_PATH, new ConstantGeneratorOptions
+                    ConstantGenerator.Run(MapBuilder.MAP_PATH, MapBuilder.SOURCE_CODE_PATH, new ConstantGeneratorOptions
                     {
                         IncludeCode = true
                     });
                     break;
                 case ConsoleKey.NumPad2:
                 case ConsoleKey.D2:
-                    Build(false);
-                    break;
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
-                    Build(true);
+                case ConsoleKey.NumPad4:
+                case ConsoleKey.D4:
+                    Console.Clear();
+                    Console.WriteLine($"{Environment.NewLine}Unimplemented input.");
+                    Console.WriteLine("");
+                    MakeDecision();
+                    break;
+
+                case ConsoleKey.NumPad5:
+                case ConsoleKey.D5:
+                    Console.WriteLine("");
+                    MapBuilder.Build();
+                    Console.WriteLine("Build finishes, you can close this console for now");
+                    break;
+                case ConsoleKey.NumPad6:
+                case ConsoleKey.D6:
+                    Console.WriteLine("");
+                    var mapPath = MapBuilder.Build();
+                    LaunchMap(mapPath);
+                    Console.WriteLine("Build finishes, you can close this console for now");
                     break;
                 default:
-                    Console.WriteLine($"{Environment.NewLine}Invalid input. Please choose again.");
+                    Console.Clear();
+                    Console.WriteLine($"{Environment.NewLine}Invalid input. Please choose again.{Environment.NewLine}");
                     MakeDecision();
                     break;
             }
         }
 
-        public static void Build(bool launch)
+        public static void LaunchMap(string path)
         {
-            // Ensure these folders exist
-            Directory.CreateDirectory(ASSETS_FOLDER_PATH);
-            Directory.CreateDirectory(OUTPUT_FOLDER_PATH);
+                var config = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(MapBuilder.BASE_PATH + @"Launcher\app.config.json"));
+                string wc3exe = config["warcraftExecutable"];
 
-            // Load existing map data
-            var map = Map.Open(BASE_MAP_PATH);
-            var builder = new MapBuilder(map);
-            builder.AddFiles(BASE_MAP_PATH, "*", SearchOption.AllDirectories);
-            builder.AddFiles(ASSETS_FOLDER_PATH, "*", SearchOption.AllDirectories);
-
-            // Set debug options if necessary, configure compiler
-            var csc = DEBUG ? "-debug -define:DEBUG" : null;
-            var csproj = Directory.EnumerateFiles(SOURCE_CODE_PROJECT_FOLDER_PATH, "*.csproj", SearchOption.TopDirectoryOnly).Single();
-            var compiler = new Compiler(csproj, OUTPUT_FOLDER_PATH, string.Empty, null, "War3Api.*;WCSharp.*", "", csc, false, null, string.Empty)
-            {
-                IsExportMetadata = true,
-                IsModule = false,
-                IsInlineSimpleProperty = false,
-                IsPreventDebugObject = true,
-                IsCommentsDisabled = true,
-            };
-
-            // Collect required paths and compile
-            var coreSystemFiles = CSharpLua.CoreSystem.CoreSystemProvider.GetCoreSystemFiles();
-            var blizzardJ = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Warcraft III/JassHelper/Blizzard.j");
-            var commonJ = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Warcraft III/JassHelper/common.j");
-            var compileResult = map.CompileScript(compiler, coreSystemFiles, blizzardJ, commonJ);
-
-            // If compilation failed, output an error
-            if (!compileResult.Success)
-            {
-                throw new Exception(compileResult.Diagnostics.First(x => x.Severity == DiagnosticSeverity.Error).GetMessage());
-            }
-
-            // Update war3map.lua so you can inspect the generated Lua code easily
-            File.WriteAllText(Path.Combine(OUTPUT_FOLDER_PATH, OUTPUT_SCRIPT_NAME), map.Script);
-
-            // Build w3x file
-            var archiveCreateOptions = new MpqArchiveCreateOptions
-            {
-                ListFileCreateMode = MpqFileCreateMode.Overwrite,
-                AttributesCreateMode = MpqFileCreateMode.Prune,
-                BlockSize = 3,
-            };
-
-            builder.Build(Path.Combine(OUTPUT_FOLDER_PATH, OUTPUT_MAP_NAME), archiveCreateOptions);
-
-            // Launch if that option was selected
-            if (launch)
-            {
-                var wc3exe = ConfigurationManager.AppSettings["wc3exe"];
                 if (File.Exists(wc3exe))
                 {
                     var commandLineArgs = new StringBuilder();
                     var isReforged = Version.Parse(FileVersionInfo.GetVersionInfo(wc3exe).FileVersion) >= new Version(1, 32);
-                    if (isReforged)
-                    {
-                        commandLineArgs.Append(" -launch");
-                    }
-                    else if (GRAPHICS_API != null)
-                    {
-                        commandLineArgs.Append($" -graphicsapi {GRAPHICS_API}");
-                    }
+                    if (isReforged) commandLineArgs.Append(" -launch");
 
-                    if (!PAUSE_GAME_ON_LOSE_FOCUS)
-                    {
-                        commandLineArgs.Append(" -nowfpause");
-                    }
+                    commandLineArgs.Append($" -graphicsapi ").Append(Program.GRAPHICS_API);
+                    commandLineArgs.Append(" -nowfpause"); // pause on loose focus
 
-                    var mapPath = Path.Combine(OUTPUT_FOLDER_PATH, OUTPUT_MAP_NAME);
-                    var absoluteMapPath = new FileInfo(mapPath).FullName;
+                    var absoluteMapPath = new FileInfo(path).FullName;
                     commandLineArgs.Append($" -loadfile \"{absoluteMapPath}\"");
 
                     Process.Start(wc3exe, commandLineArgs.ToString());
+                    Console.WriteLine("The map should be loaded on reforged now...");
                 }
                 else
                 {
-                    throw new Exception("Please set wc3exe in Launcher/app.config to the path of your Warcraft III executable.");
+                    throw new AggregateException("Please set wc3exe in Launcher/app.config to the path of your Warcraft III executable.");
                 }
-            }
         }
     }
 }

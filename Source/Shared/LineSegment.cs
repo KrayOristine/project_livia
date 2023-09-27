@@ -1,4 +1,20 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="LineSegment.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
 using static War3Api.Blizzard;
 using static War3Api.Common;
@@ -7,32 +23,28 @@ namespace Source.Shared
 {
     public static class LineSegment
     {
-        internal static rect r = Rect(0, 0, 0, 0);
-        internal static group g = CreateGroup();
+        private static readonly rect r = Rect(0, 0, 0, 0);
+        private static readonly group g = CreateGroup();
 
-        internal static float ox = 0f;
-        internal static float oy = 0f;
-        internal static float dx = 0f;
-        internal static float dy = 0f;
-        internal static float da = 0f;
-        internal static float db = 0f;
-        internal static float ui = 0f;
-        internal static float uj = 0f;
-        internal static float wdx = 0f;
-        internal static float wdy = 0f;
+        private static float ox = 0f;
+        private static float oy = 0f;
+        private static float da = 0f;
+        private static float db = 0f;
+        private static float ui = 0f;
+        private static float uj = 0f;
 
-        internal static void Prepare(float ax, float ay, float bx, float by, float offset)
+        private static void Prepare(float ax, float ay, float bx, float by, float offset)
         {
             // Get center coordinates of the rectangle
             ox = 0.5f * (ax + bx);
             oy = 0.5f * (ay + by);
 
             // Get rectangle major axis as vector
-            dx = 0.5f * (bx - ax);
-            dy = 0.5f * (by - ay);
+            float dx = 0.5f * (bx - ax);
+            float dy = 0.5f * (by - ay);
 
             // Get half of the rectangle length and height
-            da = (float)Math.Sqrt(dx * dx + dy * dy);
+            da = Lua.Math.Sqrt(dx * dx + dy * dy);
             db = offset;
 
             // Get unit vector of the major axis
@@ -65,79 +77,77 @@ namespace Source.Shared
             SetRect(r, xn - offset, yn - offset, xx + offset, yx + offset);
         }
 
-        internal static bool ContainWidget(widget w, float offset)
+        private static bool ContainWidget(widget w, float offset)
         {
-            wdx = GetWidgetX(w) - ox;
-            wdy = GetWidgetY(w) - oy;
-            dx = wdx * ui + wdy * uj;
-            dy = wdx * -uj + wdy * ui;
+            float wdx = GetWidgetX(w) - ox;
+            float wdy = GetWidgetY(w) - oy;
+            float dx = wdx * ui + wdy * uj;
+            float dy = wdx * -uj + wdy * ui;
             da += offset;
             db += offset;
 
             return dx * dx <= da * da && dy * dy <= db * db;
         }
 
-        internal static readonly List<widget> lastEnums = new();
-        internal static bool enumUsed = false;
+        private static readonly List<widget> lastEnum = new();
 
-        public static List<widget> LastEnums { get => lastEnums; }
+        public static List<widget> LastEnum { get => lastEnum; }
 
-        public static List<widget> EnumsUnit(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumUnit(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
-
             Prepare(minX, minY, maxX, maxY, offset);
             WarEX.EXGroupEnumUnitInRect(g, r, null);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             for (int i = 0; i < BlzGroupGetSize(g); i++)
             {
                 unit u = BlzGroupUnitAt(g, i);
                 if (ContainWidget(u, checkCollision ? BlzGetUnitCollisionSize(u) : 0.0f))
                 {
-                    lastEnums.Add(u);
+                    lastEnum.Add(u);
                 }
             }
             GroupClear(g);
 
-            return lastEnums;
+            return lastEnum;
         }
 
-        internal static bool DestructableFilter()
+        private static bool DestructableFilter()
         {
             destructable d = GetFilterDestructable();
-            if (ContainWidget(d, 0.0f)) lastEnums.Add(d);
+            if (ContainWidget(d, 0.0f)) lastEnum.Add(d);
             return false;
         }
 
-        public static List<widget> EnumsDestructable(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumDestructable(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
             Prepare(minX, minY, maxX, maxY, offset);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             var f = Filter(DestructableFilter);
             EnumDestructablesInRect(r, f, DoNothing);
             DestroyBoolExpr(f);
 
-            return lastEnums;
+            return lastEnum;
         }
 
-        internal static bool ItemFilter()
+        private static bool ItemFilter()
         {
             item itm = GetFilterItem();
-            if (ContainWidget(itm, 0.0f)) lastEnums.Add(itm);
+            if (ContainWidget(itm, 0.0f)) lastEnum.Add(itm);
             return false;
         }
 
-        public static List<widget> EnumsItem(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
+        public static List<widget> EnumItem(float minX, float maxX, float minY, float maxY, float offset, bool checkCollision = false)
         {
             Prepare(minX, minY, maxX, maxY, offset);
-            lastEnums.Clear();
+            lastEnum.Clear();
 
             var f = Filter(ItemFilter);
             EnumItemsInRect(r, f, DoNothing);
             DestroyBoolExpr(f);
 
-            return lastEnums;
+            return lastEnum;
         }
     }
 }

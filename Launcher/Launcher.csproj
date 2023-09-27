@@ -1,24 +1,36 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
+    <Optimize>true</Optimize>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Include="..\.editorconfig" Link=".editorconfig" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="DotNetZip" Version="1.16.0" />
-	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
-	  <PackageReference Include="System.Security.Permissions" Version="7.0.0" />
-	  <PackageReference Include="War3Api.Blizzard" Version="1.33.0" />
-	  <PackageReference Include="War3Api.Common" Version="1.33.0" />
-	  <PackageReference Include="War3Net.Build" Version="5.7.1" />
-	  <PackageReference Include="War3Net.CSharpLua" Version="1.8.0-preview.1" />
-	  <PackageReference Include="War3Net.CSharpLua.CoreSystem" Version="1.7.18" />
-	  <PackageReference Include="WCSharp.ConstantGenerator" Version="2.1.0" />
-	</ItemGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ActiveDebugProfile>Launcher</ActiveDebugProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="test.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Jering.Javascript.NodeJS" Version="7.0.0" />
+    <PackageReference Include="libzopfli-sharp" Version="1.0.14325.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="WCSharp.ConstantGenerator" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CSharp.luaEX\CSharp.lua.CoreSystem\CSharp.lua.CoreSystem.csproj" />
+    <ProjectReference Include="..\..\CSharp.luaEX\CSharp.lua\CSharp.lua.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.Build.Core\War3Net.Build.Core.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.Build\War3Net.Build.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.CodeAnalysis.Jass\War3Net.CodeAnalysis.Jass.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.CodeAnalysis.Transpilers\War3Net.CodeAnalysis.Transpilers.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.CodeAnalysis\War3Net.CodeAnalysis.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.Common\War3Net.Common.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.IO.Compression\War3Net.IO.Compression.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.IO.Mpq\War3Net.IO.Mpq.csproj" />
+    <ProjectReference Include="..\..\War3NetEX\src\War3Net.IO.Slk\War3Net.IO.Slk.csproj" />
+  </ItemGroup>
 </Project>

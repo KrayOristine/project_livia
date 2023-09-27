@@ -1,4 +1,20 @@
-﻿using War3Api;
+﻿// ------------------------------------------------------------------------------
+// <copyright file="WarEX.cs" company="Kray Oristine">
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+// </copyright>
+// ------------------------------------------------------------------------------
+using War3Api;
 
 namespace Source.Shared
 {
@@ -9,10 +25,10 @@ namespace Source.Shared
         /// @CSharpLua.Template = "BlzGetHeroPrimaryStat({0})"
         public static extern int BlzGetHeroPrimaryStat(Common.unit u);
 
-        /// @CSharpLua.Template = "BlzSetHeroStatEx({0})"
+        /// @CSharpLua.Template = "BlzSetHeroStatEx({0}, {1}, {2})"
         public static extern void BlzSetHeroStatEx(Common.unit u, int i, int amt);
 
-        /// @CSharpLua.Template = "BlzGetHeroStat({0})"
+        /// @CSharpLua.Template = "BlzGetHeroStat({0}, {1})"
         public static extern int BlzGetHeroStat(Common.unit u, int i);
 #pragma warning restore S4200
 #pragma warning restore CS0626
@@ -91,14 +107,14 @@ namespace Source.Shared
             Common.GroupEnumUnitsInRect(g, r, filter);
         }
 
-        public static void EXGroupEnumUnitInRange(Common.group g, float x, float y, float radius, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitInRange(Common.group g, float x, float y, float radius, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 
             Common.GroupEnumUnitsInRange(g, x, y, radius, filter);
         }
 
-        public static void EXGroupEnumUnitInRangeOfLoc(Common.group g, Common.location l, float radius, Common.boolexpr? filter, bool wantDestroy = false)
+        public static void EXGroupEnumUnitInRangeOfLoc(Common.group g, Common.location l, float radius, Common.boolexpr? filter = null, bool wantDestroy = false)
         {
             float x = l == null ? 0 : Common.GetLocationX(l);
             float y = l == null ? 0 : Common.GetLocationY(l);
@@ -108,14 +124,14 @@ namespace Source.Shared
             if (wantDestroy) Common.RemoveLocation(l);
         }
 
-        public static void EXGroupEnumUnitOfPlayer(Common.group g, Common.player p, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitOfPlayer(Common.group g, Common.player p, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 
             Common.GroupEnumUnitsOfPlayer(g, p, filter);
         }
 
-        public static void EXGroupEnumUnitSelected(Common.group g, Common.player p, Common.boolexpr? filter)
+        public static void EXGroupEnumUnitSelected(Common.group g, Common.player p, Common.boolexpr? filter = null)
         {
             filter ??= SafeFilter;
 
