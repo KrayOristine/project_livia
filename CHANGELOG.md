@@ -3,7 +3,8 @@
 ## 0.0.3
 
 - Major changes to map compiler, transpiler
-- Added credit for people who helped me on the way of making this map (probably grow more as time goes on
+- Added credit for people who helped me on the way of making this map (probably grow more as time goes on)
+- Launcher now no longer be hidden out of other people.
 
 ## 0.0.2.a
 
