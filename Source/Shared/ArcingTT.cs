@@ -33,7 +33,7 @@ namespace Source.Shared
         private const int Z_OFFSET_BON = 50; // How much extra height the text gains
         private const int VELOCITY = 4; //  How fast the text moves in x/y plane
 
-        private static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(1.0f / 32.0f);
+        private static readonly PeriodicTrigger<ArcingTT> periodicTrigger = new(PeriodicEvents.SYSTEM_INTERVAL);
         private static readonly Stack<ArcingTT> cache = new();
 
         public float passed = 0;
@@ -59,11 +59,11 @@ namespace Source.Shared
                 return;
             }
             if (tt == null) return;
-            float point = (float)Math.Sin(Math.PI * ((lifeSpan - passed) / timeScale));
+            float delta = MathF.Sin(MathF.PI * ((lifeSpan - passed) / timeScale));
             x += acos;
             y += asin;
-            SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * point);
-            SetTextTagText(tt, text, (SIZE_MIN + SIZE_BONUS * point) * size);
+            SetTextTagPos(tt, x, y, Z_OFFSET + Z_OFFSET_BON * delta);
+            SetTextTagText(tt, text, (SIZE_MIN + SIZE_BONUS * delta) * size);
         }
 
         internal static ArcingTT GetCache(float time, float life, float asin, float acos, texttag? tt, string text, float x, float y)

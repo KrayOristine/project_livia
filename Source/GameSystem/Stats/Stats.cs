@@ -18,13 +18,13 @@ using System.Runtime.CompilerServices;
 using static War3Api.Common;
 
 // Shorthand for Update, since i lazy as fuck
-using UpdateAction = System.Action<War3Api.Common.unit, double, double, Source.GameSystem.Stats.ModifyMode>;
+using UpdateAction = System.Action<War3Api.Common.unit, double, double, Source.GameSystem.Stats.Mode>;
 
 namespace Source.GameSystem.Stats
 {
 
     /// <summary>
-    /// Class that handle stats creation and features
+    /// Class that _handle stats creation and features
     /// </summary>
     static class ExStats
     {

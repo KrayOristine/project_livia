@@ -76,6 +76,7 @@ namespace Source.GameSystem.Damage
 
         public static void Recycle(DamageTrigger trigger)
         {
+            if (trigger == null) throw new ArgumentNullException(nameof(trigger), "trigger is null");
             trigger.isEmpty = true;
             cache.Push(trigger);
         }

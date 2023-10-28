@@ -26,7 +26,7 @@ namespace Source.GameSystem.MissileEX
 {
 
     /// <summary>
-    ///  The one that handle the execution of the missile
+    ///  The one that _handle the execution of the missile
     /// </summary>
     public static class MissileSystem
     {

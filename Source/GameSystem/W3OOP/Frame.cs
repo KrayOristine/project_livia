@@ -210,9 +210,9 @@ namespace Source.GameSystem.W3OOP
         /// <param name="frameType"></param>
         /// <param name="index"></param>
         /// <returns>An origin frame</returns>
-        /// <remarks>Will occupy 1 handle id each time it return a frame not yet exists in the game</remarks>
+        /// <remarks>Will occupy 1 _handle id each time it return a frame not yet exists in the game</remarks>
         /// @CSharpLua.Template = "BlzGetOriginFrame({0}, {1})"
-        public static extern Frame GetOriginFrame(OriginType frameType, int index);
+        public static extern Frame GetOrigin(OriginType frameType, int index);
 
         /// <summary>
         /// Hides/Shows most of the default in-game UI. Unaffected: Mouse, Command Buttons, Chat, Messages, TimerDialog, Multiboard, Leaderboard and ConsoleUIBackdrop.<br/>
@@ -220,7 +220,7 @@ namespace Source.GameSystem.W3OOP
         /// </summary>
         /// <param name="enable"></param>
         /// @CSharpLua.Template = "BlzHideOriginFrames({0})"
-        public static extern void HideOriginFrames(bool enable);
+        public static extern void HideOrigin(bool enable);
 
         /// <summary>
         /// Disabling this will prevent the game using default positions for changed hidden frames as soon they reappear/their state is changed.
@@ -311,8 +311,8 @@ namespace Source.GameSystem.W3OOP
         /// Get back the <see cref="framehandle"/> of this frame object
         /// </summary>
         /// <returns>It original <see cref="framehandle"/></returns>
-        /// @CSharpLua.Template = "{this}"
-        public extern framehandle GetHandle();
+        /// @CSharpLua.Get = "{this}"
+        public framehandle Handle { get; }
 
         #endregion
 
@@ -331,7 +331,7 @@ namespace Source.GameSystem.W3OOP
         /// <param name="name">Target frame name</param>
         /// <param name="createContext">Index of the target frame</param>
         /// <returns>A warcraft frame</returns>
-        /// <remarks>Will occupy 1 handle id each time it return a frame not yet exists in the game</remarks>
+        /// <remarks>Will occupy 1 _handle id each time it return a frame not yet exists in the game</remarks>
         /// @CSharpLua.Template = "BlzGetFrameByName({0}, {1})"
         public static extern Frame GetByName(string name, int createContext);
 
@@ -339,16 +339,16 @@ namespace Source.GameSystem.W3OOP
         /// Get the parent of this frame
         /// </summary>
         /// <returns>The parent frame</returns>
-        /// <remarks>Will occupy 1 handle id each time it return a frame not yet exists in the game</remarks>
-        /// @CSharpLua.Template = "BlzFrameGetParent({this})"
-        public extern Frame GetParent();
+        /// <remarks>Will occupy 1 _handle id each time it return a frame not yet exists in the game</remarks>
+        /// @CSharpLua.Get = "BlzFrameGetParent({this})"
+        public Frame Parent { get; }
 
         /// <summary>
         /// Get the amount of children within this frame
         /// </summary>
         /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetChildrenCount({this})"
-        public extern int GetChildrenCount();
+        /// @CSharpLua.Get = "BlzFrameGetChildrenCount({this})"
+        public int ChildrenCount { get; }
 
         /// <summary>
         /// Get the selected children frame at given index within this frame
@@ -482,9 +482,66 @@ namespace Source.GameSystem.W3OOP
         /// <summary>
         ///
         /// </summary>
-        /// <param name="text"></param>
-        /// @CSharpLua.Template = "BlzFrameSetText({this}, {0})"
-        public extern void SetText(string text);
+        /// @CSharpLua.Get = "BlzFrameGetText({this})"
+        /// @CSharpLua.Set = "BlzFrameSetText({this}, {0})"
+        public extern string Text { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetAlpha({this})"
+        /// @CSharpLua.Set = "BlzFrameSetAlpha({this}, {0})"
+        public extern int Alpha { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetScale({this})"
+        /// @CSharpLua.Set = "BlzFrameSetScale({this}, {0})"
+        public extern float Scale { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetValue({this})"
+        /// @CSharpLua.Set = "BlzFrameSetValue({this}, {0})"
+        public extern float Value { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetTextSizeLimit({this})"
+        /// @CSharpLua.Set = "BlzFrameSetTextSizeLimit({this}, {0})"
+        public extern int TextSizeLimit { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetWidth({this})"
+        /// @CSharpLua.Set = "BlzFrameSetSize({this}, {0}, BlzFrameGetHeight({this}))"
+        public extern float Width { get; set; }
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetHeight({this})"
+        /// @CSharpLua.Set = "BlzFrameSetSize({this}, BlzFrameGetWidth({this}), {0})"
+        public extern float Height { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetEnable({this})"
+        /// @CSharpLua.Set = "BlzFrameSetEnable({this}, {0})"
+        public extern bool Enable { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetVisible({this})"
+        /// @CSharpLua.Set = "BlzFrameSetVisible({this}, {0})"
+        public extern bool Visible { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// @CSharpLua.Get = "BlzFrameGetName({this})"
+        public extern string Name { get; }
+
 
         /// <summary>
         ///
@@ -528,27 +585,6 @@ namespace Source.GameSystem.W3OOP
         /// <summary>
         ///
         /// </summary>
-        /// <param name="alpha"></param>
-        /// @CSharpLua.Template = "BlzFrameSetAlpha({this}, {0})"
-        public extern void SetAlpha(int alpha);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="scale"></param>
-        /// @CSharpLua.Template = "BlzFrameSetScale({this}, {0})"
-        public extern void SetScale(float scale);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="value"></param>
-        /// @CSharpLua.Template = "BlzFrameSetValue({this}, {0})"
-        public extern void SetValue(float value);
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="level"></param>
         /// @CSharpLua.Template = "BlzFrameSetLevel({this}, {0})"
         public extern void SetLevel(int level);
@@ -556,23 +592,9 @@ namespace Source.GameSystem.W3OOP
         /// <summary>
         ///
         /// </summary>
-        /// <param name="enabled"></param>
-        /// @CSharpLua.Template = "BlzFrameSetEnable({this}, {0})"
-        public extern void SetEnable(bool enabled);
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="parent"></param>
         /// @CSharpLua.Template = "BlzFrameSetParent({this}, {0})"
         public extern void SetParent(Frame parent);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="visible"></param>
-        /// @CSharpLua.Template = "BlzFrameSetVisible({this}, {0})"
-        public extern void SetVisible(bool visible);
 
         /// <summary>
         ///
@@ -622,13 +644,6 @@ namespace Source.GameSystem.W3OOP
         /// <summary>
         ///
         /// </summary>
-        /// <param name="size"></param>
-        /// @CSharpLua.Template = "BlzFrameSetTextSizeLimit({this}, {0})"
-        public extern void SetTextSizeLimit(int size);
-
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="primaryProp"></param>
         /// <param name="flags"></param>
         /// @CSharpLua.Template = "BlzFrameSetSpriteAnimate({this}, {0}, {1})"
@@ -641,69 +656,6 @@ namespace Source.GameSystem.W3OOP
         /// <param name="horizontal"></param>
         /// @CSharpLua.Template = "BlzFrameSetTextAlignment({this}, {0}, {1})"
         public extern void SetTextAlignment(TextAlignment vertical, TextAlignment horizontal);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetTextSizeLimit({this})"
-        public extern int GetTextSizeLimit();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetName({this})"
-        public extern string GetName();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetText({this})"
-        public extern string GetText();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetAlpha({this})"
-        public extern int GetAlpha();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetValue({this})"
-        public extern float GetValue();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetWidth({this})"
-        public extern float GetWidth();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetEnable({this})"
-        public extern bool GetEnable();
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameGetHeight({this})"
-        public extern float GetHeight();
-
-        /// <summary>
-        /// Get is the frame visible or not (ASYNC)
-        /// </summary>
-        /// <returns></returns>
-        /// @CSharpLua.Template = "BlzFrameIsVisible({this})"
-        public extern bool IsVisible();
 
         #endregion
 

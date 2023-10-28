@@ -95,7 +95,7 @@ namespace Source.GameSystem.Save
         /// <returns></returns>
         internal static int HashData(string buffer, player player)
         {
-            string hashName = Checksum.Serialize(GetPlayerName(player));
+            string hashName = Checksum.Serialize(player.Name);
             string hashBuffer = Checksum.Serialize(buffer);
 
             return HashString(Checksum.Serialize(hashName + hashBuffer));
@@ -190,7 +190,7 @@ namespace Source.GameSystem.Save
         /// <exception cref="ArgumentOutOfRangeException">Array size longer than 300</exception>
         public static string Encode(int[] data, int maxLength = 300)
         {
-            if (data.Length > maxLength) throw new ArgumentOutOfRangeException(nameof(data), "Attempt to encode too much amount of data");
+            if (data.Length > maxLength - 10) throw new ArgumentOutOfRangeException(nameof(data), "Attempt to encode too much amount of data");
             if (maxLength < 1) throw new ArgumentOutOfRangeException(nameof(maxLength), "The maximum length to encode can't be lesser than 1");
             StringBuilder buffer = new();
             for (int i = 0; i < data.Length; i++) buffer.Append(data[i]).Append('-');

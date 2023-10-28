@@ -36,21 +36,21 @@ using System.Text;
 namespace Source.Shared
 {
 
-    public sealed class PseudoRandom
+    public sealed class LinearCongruentialGenerator
     {
-        private decimal seed;
-        private readonly decimal div;
-        private readonly decimal mod;
-        private readonly decimal mult;
-        private readonly decimal inc;
+        private int seed;
+        private readonly int div;
+        private readonly int mod;
+        private readonly int mult;
+        private readonly int inc;
 
-        public PseudoRandom(decimal seed, decimal mult, decimal mod, decimal inc)
+        public LinearCongruentialGenerator(int seed, int mult, int mod, int inc)
         {
 #if DEBUG
-            if (seed < 0) throw new ArgumentOutOfRangeException(nameof(seed), "Don't pass negative seed value to Pseudo Random");
-            if (mult < 0) throw new ArgumentOutOfRangeException(nameof(mult), "Don't pass negative mult value to Pseudo Random");
-            if (mod < 0) throw new ArgumentOutOfRangeException(nameof(mod), "Don't pass negative mod value to Pseudo Random");
-            if (inc < 0) throw new ArgumentOutOfRangeException(nameof(inc), "Don't pass negative inc value to Pseudo Random");
+            if (seed < 0) throw new ArgumentOutOfRangeException(nameof(seed), $"Don't pass negative seed value to {nameof(LinearCongruentialGenerator)}");
+            if (mult < 0) throw new ArgumentOutOfRangeException(nameof(mult), $"Don't pass negative mult value to {nameof(LinearCongruentialGenerator)}");
+            if (mod < 0) throw new ArgumentOutOfRangeException(nameof(mod), $"Don't pass negative mod value to {nameof(LinearCongruentialGenerator)}");
+            if (inc < 0) throw new ArgumentOutOfRangeException(nameof(inc), $"Don't pass negative inc value to {nameof(LinearCongruentialGenerator)}");
 #else
             if (seed < 0 || inc < 0 || mod < 0 || mult < 0)
                 throw new ArgumentOutOfRangeException();
@@ -66,13 +66,13 @@ namespace Source.Shared
         /// Generate a new random values in between 0 and 1
         /// </summary>
         /// <returns></returns>
-        public decimal Next()
+        public float Next()
         {
             var d = seed * mult + inc;
-            var m = Math.Floor(d * div) * mod;
+            var m = MathF.Floor(d * div) * mod;
             if (m < 0) m += mod;
 
-            seed = m;
+            seed = (int)m;
             m *= div;
 
             return m;
@@ -83,13 +83,13 @@ namespace Source.Shared
         /// </summary>
         /// <param name="max">Maximum value to generate</param>
         /// <returns></returns>
-        public decimal Next(decimal max)
+        public float Next(float max)
         {
             var d = seed * mult + inc;
-            var m = Math.Floor(d * div) * mod;
+            var m = MathF.Floor(d * div) * mod;
             if (m < 0) m += mod;
 
-            seed = m;
+            seed = (int)m;
             m *= div;
 
             return m * (max - 1) + 1;
@@ -101,13 +101,13 @@ namespace Source.Shared
         /// <param name="low">Minimum value</param>
         /// <param name="high">Maximum value</param>
         /// <returns></returns>
-        public decimal Next(decimal low, decimal high)
+        public float Next(float low, float high)
         {
             var d = seed * mult + inc;
-            var m = Math.Floor(d * div) * mod;
+            var m = MathF.Floor(d * div) * mod;
             if (m < 0) m += mod;
 
-            seed = m;
+            seed = (int)m;
             m *= div;
 
             return m * (high - low) + low;
@@ -123,13 +123,13 @@ namespace Source.Shared
         public int Next(int low, int high)
         {
             var d = seed * mult + inc;
-            var m = Math.Floor(d * div) * mod;
+            var m = MathF.Floor(d * div) * mod;
             if (m < 0) m += mod;
 
-            seed = m;
+            seed = (int)m;
             m *= div;
             m *= high - low + low;
-            m = m >= 0 ? Math.Floor(m + 0.5m) : Math.Ceiling(m - 0.5m);
+            m = m >= 0 ? MathF.Floor(m + 0.5f) : MathF.Ceiling(m - 0.5f);
             return (int)m;
         }
     }

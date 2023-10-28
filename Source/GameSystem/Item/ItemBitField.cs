@@ -24,7 +24,7 @@ namespace Source.GameSystem.Item
         /// <summary>
         /// Item types
         /// </summary>
-        public enum Types : uint
+        public enum ItemTypeFlag
         {
             None = 0,
             Consumable = 1,
@@ -40,9 +40,9 @@ namespace Source.GameSystem.Item
         }
 
         /// <summary>
-        /// Item Rarities
+        /// Item ItemRarityFlag
         /// </summary>
-        public enum Rarities : uint
+        public enum ItemRarityFlag
         {
             None = 0,
             Common = 1,
@@ -57,9 +57,9 @@ namespace Source.GameSystem.Item
         }
 
         /// <summary>
-        /// Prefixes for potion, consumable, equipment, gems, rune or relic items
+        /// ItemPrefixFlag for potion, consumable, equipment, gems, rune or relic items
         /// </summary>
-        public enum Prefixes : uint
+        public enum ItemPrefixFlag
         {
             None = 0,
             Corrupted = 1,
@@ -70,9 +70,9 @@ namespace Source.GameSystem.Item
         }
 
         /// <summary>
-        /// Suffixes for equipment, gems or relic item
+        /// ItemSuffixFlag for equipment, gems or relic item
         /// </summary>
-        public enum Suffixes : uint
+        public enum ItemSuffixFlag
         {
             None = 0,
             Power = 1,
@@ -93,7 +93,7 @@ namespace Source.GameSystem.Item
         /// <summary>
         /// Item flags, for marking item
         /// </summary>
-        public enum Flags : uint
+        public enum ItemInternalFlag
         {
             None = 0,
             Quest = 1,

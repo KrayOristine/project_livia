@@ -16,12 +16,6 @@
 // ------------------------------------------------------------------------------
 using War3Api;
 
-/*
- * Ozzzzymaniac Custom Save/Load
- *
- * This is the core function of the maps
- */
-
 namespace Source.GameSystem.Save
 {
     public abstract class Saveable
@@ -35,7 +29,7 @@ namespace Source.GameSystem.Save
         {
             boundedPlayer = boundPlayer;
             boundedSlot = boundSlot;
-            hash = Checksum.Serialize(Common.GetPlayerName(boundPlayer) + boundSlot.ToString());
+            hash = Checksum.Serialize(boundPlayer.Name + boundSlot.ToString());
         }
     }
 }

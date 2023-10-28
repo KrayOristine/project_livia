@@ -1,5 +1,5 @@
 ﻿// ------------------------------------------------------------------------------
-// <copyright file="ExtraMathh.cs" company="Kray Oristine">
+// <copyright file="ModifyMode.cs" company="Kray Oristine">
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -14,19 +14,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Source.Shared
+// Shorthand for Update, since i lazy as fuck
+
+namespace Source.GameSystem.Stats
 {
-    /// <summary>
-    /// Class that add some unity math
-    /// </summary>
-    public static class ExtraMath
+    public enum Mode
     {
+        BASE,
+        BONUS,
+        TOTAL
     }
 }

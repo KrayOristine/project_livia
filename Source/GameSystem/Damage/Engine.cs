@@ -20,6 +20,7 @@
 using Source.Shared;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using static War3Api.Blizzard;
 using static War3Api.Common;
 
@@ -34,11 +35,10 @@ namespace Source.GameSystem.Damage
         internal static readonly float DEATH_DOOR = 0.405f; // If blizzard decided to change this, it should be a simple fix here
 
         // Declare all used variables of the engine
-        private static readonly trigger damagingTrigger = CreateTrigger();
-
-        private static readonly trigger damagedTrigger = CreateTrigger();
-        private static readonly trigger recursiveTrigger = CreateTrigger();
-        private static readonly timer AsyncTimer = CreateTimer();
+        private static readonly trigger damagingTrigger = new();
+        private static readonly trigger damagedTrigger = new();
+        private static readonly trigger recursiveTrigger = new();
+        private static readonly timer AsyncTimer = new();
         private static bool alarmStarted = false;
         private static bool isNotNativeRecursiveDamage = false;
         private static bool waitingForDamageEvents = false;
@@ -50,7 +50,7 @@ namespace Source.GameSystem.Damage
         private static int sourceStacks = 1;
         private static unit? orgSource;
         private static unit? orgTarget;
-        private static readonly Dictionary<unit, bool> targets = new();
+        private static readonly HashSet<unit> targets = new();
 
         private static readonly bool[] attackImmune = {
             false, // ATTACK_TYPE_NORMAL
@@ -96,9 +96,9 @@ namespace Source.GameSystem.Damage
         private static DamageInstance current;
         private static DamageInstance lastInstance;
         private static bool skipEngine = false;
-        private static readonly List<DamageInstance> recursiveStacks = new();
-        private static readonly Dictionary<unit, bool> recursiveSource = new();
-        private static readonly Dictionary<unit, bool> recursiveTarget = new();
+        private static readonly List<DamageInstance> recursiveStacks = new(32);
+        private static readonly HashSet<unit> recursiveSource = new();
+        private static readonly HashSet<unit> recursiveTarget = new();
         private static bool prep = false;
         private static bool inception = false;
 
@@ -132,7 +132,7 @@ namespace Source.GameSystem.Damage
         public static float LethalDamageHP { get; set; } = 0.0f;
         public static int SourceStacks { get => sourceStacks; }
 
-        public static DamageTypes NextType { get; set; }
+        public static int NextType { get; set; }
 
         private static readonly LinkedList<DamageTrigger>[] eventList =
         {
@@ -229,20 +229,20 @@ namespace Source.GameSystem.Damage
         {
             if (flags)
             {
-                if (callbackInProgress) EnableTrigger(recursiveTrigger);
+                if (callbackInProgress) recursiveTrigger.Enable();
                 else
                 {
-                    EnableTrigger(damagingTrigger);
-                    EnableTrigger(damagedTrigger);
+                    damagingTrigger.Enable();
+                    damagedTrigger.Enable();
                 }
                 return;
             }
 
-            if (callbackInProgress) DisableTrigger(recursiveTrigger);
+            if (callbackInProgress) recursiveTrigger.Disable();
             else
             {
-                DisableTrigger(damagingTrigger);
-                DisableTrigger(damagedTrigger);
+                damagingTrigger.Disable();
+                damagedTrigger.Disable();
             }
         }
 
@@ -257,40 +257,25 @@ namespace Source.GameSystem.Damage
 
         private static readonly Func<bool>[] breakChecks =
         {
-            () => current != null && (current.Flags[(int)DamageTypes.Pure] || skipEngine || current.Flags[(int)DamageTypes.INTERNAL]),
-            () => current != null && (current.Damage <= 0 || current.Flags[(int)DamageTypes.INTERNAL]),
-            () => current != null && (current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int)DamageTypes.INTERNAL]),
-            () => current != null && (current.DamageType == DAMAGE_TYPE_UNKNOWN || current.Flags[(int) DamageTypes.INTERNAL]),
-            () => current != null && (current.Flags[(int)DamageTypes.INTERNAL]),
-            () => current != null && (current.Flags[(int)DamageTypes.INTERNAL])
+            () => current == null || current.HasFlag(DamageFlag.Pure) || skipEngine || current.HasFlag(DamageFlag.INTERNAL),
+            () => current == null || current.Damage <= 0 || current.HasFlag(DamageFlag.INTERNAL),
+            () => current == null || current.DamageType == DAMAGE_TYPE_UNKNOWN || current.HasFlag(DamageFlag.INTERNAL),
+            () => current == null || current.DamageType == DAMAGE_TYPE_UNKNOWN || current.HasFlag(DamageFlag.INTERNAL),
+            () => current == null || current.HasFlag(DamageFlag.INTERNAL),
+            () => current == null || current.HasFlag(DamageFlag.INTERNAL)
         };
-
-        /// <summary>
-        /// Stupid shit will always happen, isn't it?
-        /// </summary>
-        /// <param name="method"></param>
-        public static void TryExecute(Action method)
-        {
-            try
-            {
-                method.Invoke();
-            } catch (Exception ex)
-            {
-                Logger.Error("Damage Engine", ex.Message);
-            }
-        }
 
         private static void RunEvent(DamageEvent whichEvent)
         {
             var head = eventList[(int)whichEvent];
             var checks = breakChecks[(int)whichEvent];
-            Logger.Debug("Damage Engine", $"RunEvent is running for {whichEvent}");
-            if (callbackInProgress || checks.Invoke() || head.First == null) return;
             var node = head.First;
+            Logger.Debug("Damage Engine", $"RunEvent is running for {whichEvent}");
+            if (callbackInProgress || checks.Invoke() || node == null) return;
             userIndex = node.Value;
-            DisableTrigger(damagingTrigger);
-            DisableTrigger(damagedTrigger);
-            EnableTrigger(recursiveTrigger);
+            damagingTrigger.Disable();
+            damagedTrigger.Disable();
+            recursiveTrigger.Enable();
             callbackInProgress = true;
 
             while (true)
@@ -298,8 +283,13 @@ namespace Source.GameSystem.Damage
                 if (!userIndex.isFrozen && !hasSource ||
                      whichEvent != DamageEvent.SOURCE ||
                      sourceAOE > userIndex.minAOE)
-                    TryExecute(userIndex.trig);
-
+                {
+                    /*
+                     [[
+                    xpcall(method, SourceShared.Logger.ErrorSingle)
+                     ]]
+                     */
+                }
 
                 if (node.Next == null) break;
                 node = node.Next;
@@ -307,21 +297,20 @@ namespace Source.GameSystem.Damage
             }
 
             callbackInProgress = false;
-            Enable(true);
-            DisableTrigger(recursiveTrigger);
+            damagingTrigger.Enable();
+            damagedTrigger.Enable();
+            recursiveTrigger.Disable();
         }
-
-
 
         private static DamageInstance Create(unit src, unit tgt, float dmg, bool iatk, bool irgd, attacktype tatk, damagetype tdmg, weapontype twpn)
         {
             var d = DamageInstance.Create(src, tgt, dmg, iatk, irgd, tatk, tdmg, twpn);
-
-            d.Flags[(int)DamageTypes.Spell] = tatk == ATTACK_TYPE_NORMAL && !iatk;
-            d.Flags[(int)DamageTypes.Physical] = iatk;
-            if (NextType != DamageTypes.None)
+            if (tatk == ATTACK_TYPE_NORMAL && !iatk) d.AddFlag(DamageFlag.Spell);
+            if (iatk) d.AddFlag(DamageFlag.Attack);
+            if (NextType != 0)
             {
-                d.Flags[(int)NextType] = true;
+                d.Flags = NextType;
+                NextType = 0;
             }
             return d;
         }
@@ -329,9 +318,9 @@ namespace Source.GameSystem.Damage
         private static void AddRecursive(DamageInstance d)
         {
             if (d.Damage == 0) return;
-            d.recursive = userIndex;
+            d.Recursive = userIndex;
             var allowIncep = inception || userIndex.allowInception;
-            if (!recursiveCallbackInProcess && recursiveSource.ContainsKey(d.Source) && recursiveTarget.ContainsKey(d.Target))
+            if (!recursiveCallbackInProcess && recursiveSource.Contains(d.Source) && recursiveTarget.Contains(d.Target))
             {
                 if (!allowIncep) userIndex.isFrozen = true;
                 else if (!userIndex.isFrozen && userIndex.InceptionFloor < recursiveCallbackDepth)
@@ -347,7 +336,7 @@ namespace Source.GameSystem.Damage
         {
             for (int i = 0; i < recursiveStacks.Count; i++)
             {
-                DamageTrigger? recursive = recursiveStacks[i].recursive;
+                DamageTrigger? recursive = recursiveStacks[i].Recursive;
                 if (recursive == null) continue;
 
                 recursive.isFrozen = false;
@@ -387,10 +376,10 @@ namespace Source.GameSystem.Damage
         private static bool RunDamagingEvent(DamageInstance d, bool isNatural)
         {
             current = d;
-            recursiveSource[d.Source] = true;
-            recursiveTarget[d.Target] = true;
+            recursiveSource.Add(d.Source);
+            recursiveTarget.Add(d.Target);
             if (d.Damage == 0.0f) return true;
-            skipEngine = d.DamageType == DAMAGE_TYPE_UNKNOWN || d.Flags[(int)DamageTypes.INTERNAL];
+            skipEngine = d.DamageType == DAMAGE_TYPE_UNKNOWN || d.HasFlag(DamageFlag.INTERNAL);
             RunEvent(DamageEvent.DAMAGE);
             if (isNatural)
             {
@@ -422,45 +411,50 @@ namespace Source.GameSystem.Damage
             IsCurrent = false;
             skipEngine = false;
             if (!isNotNativeRecursiveDamage && recursiveCallbackInProcess) return;
-            if (recursiveStacks.Count > 0)
+            if (recursiveStacks.Count <= 0)
             {
-                recursiveCallbackInProcess = true;
-                int i = 0;
+                Unfreeze();
+                return;
+            }
+
+            recursiveCallbackInProcess = true;
+            int i = 0;
+            do
+            {
+                recursiveCallbackDepth++;
+                int ex = recursiveStacks.Count;
                 do
                 {
-                    recursiveCallbackDepth++;
-                    int ex = recursiveStacks.Count;
-                    do
+                    prep = true;
+                    var d = recursiveStacks[i];
+                    if (d.Target.IsAlive)
                     {
-                        prep = true;
-                        var d = recursiveStacks[i];
-                        if (UnitAlive(d.Target))
+                        RunDamagingEvent(d, false);
+                        if (d.Damage > 0.0f)
                         {
-                            RunDamagingEvent(d, false);
-                            if (d.Damage > 0.0f)
-                            {
-                                DisableTrigger(damagingTrigger);
-                                EnableTrigger(damagedTrigger);
-                                waitingForDamageEvents = true;
-                                UnitDamageTarget(d.Source, d.Target, d.Damage, d.IsAttack, d.IsRanged, d.AttackType, d.DamageType, d.WeaponType);
-                            }
-                            else
-                            {
-                                RunEvent(DamageEvent.DAMAGED);
-                                if (d.Damage < 0.0f) SetWidgetLife(d.Target, GetWidgetLife(d.Target) - d.Damage);
-                            }
-                            AfterDamage();
+                            damagingTrigger.Disable();
+                            damagedTrigger.Enable();
+                            waitingForDamageEvents = true;
+                            d.Source.DealDamage(d.Target, d.Damage, d.IsAttack, d.IsRanged, d.AttackType, d.DamageType, d.WeaponType);
                         }
-                        i++;
-                    } while (i < ex);
-                } while (i < recursiveStacks.Count);
-            }
+                        else
+                        {
+                            RunEvent(DamageEvent.DAMAGED);
+                            if (d.Damage < 0.0f) d.Target.Life -= d.Damage;
+                        }
+                        AfterDamage();
+                    }
+                    i++;
+                } while (i < ex);
+            } while (i < recursiveStacks.Count);
 
             Unfreeze();
         }
 
-        public static DamageInstance Apply(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
+        [return: NotNullIfNotNull(nameof(source)), NotNullIfNotNull(nameof(target))]
+        public static DamageInstance? Apply(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
         {
+            if (source == null || target == null) return null;
             DamageInstance d;
             if (callbackInProgress)
             {
@@ -469,33 +463,36 @@ namespace Source.GameSystem.Damage
             }
             else
             {
-                UnitDamageTarget(source, target, amount, attack, ranged, atktype, dmgtype, WEAPON_TYPE_WHOKNOWS);
+                source.DealDamage(target, amount, attack, ranged, atktype, dmgtype, WEAPON_TYPE_WHOKNOWS);
                 d = current;
                 RunAfterDamageEvents();
             }
             return d;
         }
 
-        public static DamageInstance ApplyMagic(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
+        [return: NotNullIfNotNull(nameof(source)), NotNullIfNotNull(nameof(target))]
+        public static DamageInstance? ApplyMagic(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, dmgtype);
-            d.Flags[(int)DamageTypes.Magical] = true;
+            d.AddFlag(DamageFlag.Magical);
 
             return d;
         }
 
-        public static DamageInstance ApplyPhysical(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
+        [return: NotNullIfNotNull(nameof(source)), NotNullIfNotNull(nameof(target))]
+        public static DamageInstance? ApplyPhysical(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype, damagetype dmgtype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, dmgtype);
-            d.Flags[(int)DamageTypes.Physical] = true;
+            d.AddFlag(DamageFlag.Physical);
 
             return d;
         }
 
+        [return: NotNullIfNotNull(nameof(source)), NotNullIfNotNull(nameof(target))]
         public static DamageInstance ApplyPure(unit source, unit target, float amount, bool attack, bool ranged, attacktype atktype)
         {
             var d = Apply(source, target, amount, attack, ranged, atktype, DAMAGE_TYPE_UNIVERSAL);
-            d.Flags[(int)DamageTypes.Pure] = true;
+            d.AddFlag(DamageFlag.Pure);
 
             return d;
         }
@@ -510,8 +507,8 @@ namespace Source.GameSystem.Damage
         {
             alarmStarted = false;
             callbackInProgress = false;
-            EnableTrigger(damagingTrigger);
-            EnableTrigger(damagedTrigger);
+            damagingTrigger.Enable();
+            damagedTrigger.Enable();
             if (waitingForDamageEvents)
             {
                 FailsafeClear();
@@ -533,7 +530,7 @@ namespace Source.GameSystem.Damage
             {
                 if (waitingForDamageEvents)
                 {
-                    var id = GetHandleId(d.DamageType);
+                    var id = d.DamageType.HandleId;
                     if (id == 20 || id == 21 || id == 24)
                     {
                         lastInstance = current;
@@ -552,24 +549,24 @@ namespace Source.GameSystem.Damage
                     orgTarget = d.Target;
                 }
                 else if (d.Target == orgTarget) sourceStacks++;
-                else if (!targets.ContainsKey(d.Target)) sourceAOE++;
+                else if (!targets.Contains(d.Target)) sourceAOE++;
             }
             else
             {
-                TimerStart(AsyncTimer, 0f, false, AlarmExec);
+                AsyncTimer.Start(0f, AlarmExec);
                 alarmStarted = true;
                 orgSource = d.Source;
                 orgTarget = d.Target;
             }
 
-            targets[d.Target] = true;
+            targets.Add(d.Target);
             if (RunDamagingEvent(d, true))
             {
                 isNotNativeRecursiveDamage = true;
                 RunAfterDamageEvents();
             }
 
-            waitingForDamageEvents = !IsLastInstance || attackImmune[GetHandleId(d.AttackType)] || damageImmune[GetHandleId(d.DamageType)] || !IsUnitType(d.Target, UNIT_TYPE_MAGIC_IMMUNE);
+            waitingForDamageEvents = !IsLastInstance || attackImmune[d.AttackType.HandleId] || damageImmune[d.DamageType.HandleId] || !d.Target.IsUnitType(UNIT_TYPE_MAGIC_IMMUNE);
         }
 
         private static void OnDamaged()
@@ -595,17 +592,17 @@ namespace Source.GameSystem.Damage
                 RunEvent(DamageEvent.ARMOR);
                 if (hasLethal)
                 {
-                    LethalDamageHP = GetWidgetLife(d.Target) - d.Damage;
+                    LethalDamageHP = d.Target.Life - d.Damage;
                     if (LethalDamageHP <= DEATH_DOOR)
                     {
                         RunEvent(DamageEvent.LETHAL);
-                        d.Damage = GetWidgetLife(d.Target) - LethalDamageHP;
+                        d.Damage = d.Target.Life - LethalDamageHP;
                     }
                 }
             }
             if (d.DamageType != DAMAGE_TYPE_UNKNOWN) RunEvent(DamageEvent.DAMAGED);
 
-            BlzSetEventDamage(d.Damage);
+            @event.Damage = d.Damage;
             nativeEventsFinished = true;
             if (d.Damage == 0) RunAfterDamageEvents();
         }
@@ -613,7 +610,7 @@ namespace Source.GameSystem.Damage
         public static void OnRecursive()
         {
             AddRecursive(CreateFromEvent());
-            BlzSetEventDamage(0.0f);
+            @event.Damage = 0f;
         }
 
 #if DEBUG
@@ -653,7 +650,7 @@ namespace Source.GameSystem.Damage
             TriggerAddAction(damagedTrigger, OnDamaged);
             TriggerAddAction(recursiveTrigger, OnRecursive);
 #endif
-            DisableTrigger(recursiveTrigger);
+            recursiveTrigger.Disable();
 
             return true;
         }

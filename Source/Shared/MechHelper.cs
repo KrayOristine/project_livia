@@ -24,7 +24,7 @@ using static War3Api.Common;
 
 namespace Source.Shared
 {
-    enum AbilityId : int
+    enum AbilityId
     {
         Abun = 1096971630,
         Silence = 1513107504, // Z000
@@ -103,7 +103,7 @@ namespace Source.Shared
 
         public void Action()
         {
-            if (Duration <= 0 || !UnitAlive(Target))
+            if (Duration <= 0 || !Target.IsAlive)
             {
                 Active = false;
                 return;
@@ -116,31 +116,34 @@ namespace Source.Shared
             {
                 Change = 0;
                 flag[Target] = true;
-                x[Target] = GetRandomReal(GetUnitX(Target) - MAX_CHANGE, GetUnitX(Target) + MAX_CHANGE);
-                y[Target] = GetRandomReal(GetUnitY(Target) - MAX_CHANGE, GetUnitY(Target) + MAX_CHANGE);
-                IssuePointOrderById(Target, Constants.ORDER_MOVE, x[Target], y[Target]);
+                x[Target] = GetRandomReal(Target.X - MAX_CHANGE, Target.X + MAX_CHANGE);
+                y[Target] = GetRandomReal(Target.Y - MAX_CHANGE, Target.Y + MAX_CHANGE);
+                Target.IssueOrder(Constants.ORDER_MOVE, x[Target], y[Target]);
             }
         }
 
         public void Dispose()
         {
             flag[Target] = true;
-            IssueImmediateOrderById(Target, Constants.ORDER_STOP);
+            Target.IssueOrder(Constants.ORDER_STOP);
             if (Effect != null)
             {
                 DestroyEffect(Effect);
                 Effect = null;
             }
-            UnitRemoveAbility(Target, (int)AbilityId.Abun);
+            Target.RemoveAbility((int)AbilityId.Abun);
             if (IsSelected)
             {
-                SelectUnitAddForPlayer(Target, GetOwningPlayer(Target));
+                if (player.LocalPlayer == Target.Owner)
+                {
+                    Target.Select(true);
+                }
             }
             activeDict.Remove(Target);
             cache.Push(this);
         }
 
-        public FearSystem(unit target)
+        private FearSystem(unit target)
         {
             Active = false;
             Target = target;
@@ -391,10 +394,10 @@ namespace Source.Shared
 
         internal static void ModifyDuration(unit target, int id, ability abil, float time)
         {
-            BlzSetAbilityRealLevelField(abil, ABILITY_RLF_DURATION_NORMAL, 0, time);
-            BlzSetAbilityRealLevelField(abil, ABILITY_RLF_DURATION_HERO, 0, time);
-            IncUnitAbilityLevel(target, id);
-            DecUnitAbilityLevel(target, id);
+            abil.SetField(ABILITY_RLF_DURATION_NORMAL, 0, time);
+            abil.SetField(ABILITY_RLF_DURATION_HERO, 0, time);
+            target.IncrementAbilityLevel(id);
+            target.DecrementAbilityLevel(id);
         }
 
         /// <summary>
@@ -404,14 +407,13 @@ namespace Source.Shared
         /// <param name="duration">How long should it last</param>
         public static void Silence(unit target, float duration)
         {
-            unit dummy = DummySystem.GetDummy();
-
-            SetUnitX(dummy, GetUnitX(target));
-            SetUnitY(dummy, GetUnitY(target));
-            UnitAddAbility(dummy, (int)AbilityId.Silence);
-            ModifyDuration(dummy, (int)AbilityId.Silence, BlzGetUnitAbility(dummy, (int)AbilityId.Silence), duration);
-            IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, target);
-            DummySystem.RecycleDummy(dummy, 0f);
+            var dummy = unit.FromWCSharp(DummySystem.GetDummy());
+            dummy.X = target.X;
+            dummy.Y = target.Y;
+            dummy.AddAbility((int)AbilityId.Silence);
+            ModifyDuration(dummy, (int)AbilityId.Silence, dummy.GetAbility((int)AbilityId.Silence), duration);
+            dummy.IssueOrder(Constants.ORDER_DRUNKEN_HAZE, target);
+            DummySystem.RecycleDummy(dummy.Cast<WCSharp.Api.unit>(), 0f);
         }
 
         /// <summary>
@@ -430,13 +432,13 @@ namespace Source.Shared
                 curr = BlzGroupUnitAt(target, 0);
                 if (curr != null && UnitAlive(curr))
                 {
-                    unit dummy = DummySystem.GetDummy();
-                    SetUnitX(dummy, GetUnitX(curr));
-                    SetUnitY(dummy, GetUnitY(curr));
-                    UnitAddAbility(dummy, (int)AbilityId.Silence);
-                    ModifyDuration(dummy, (int)AbilityId.Silence, BlzGetUnitAbility(dummy, (int)AbilityId.Silence), duration);
-                    IssueTargetOrderById(dummy, Constants.ORDER_DRUNKEN_HAZE, curr);
-                    DummySystem.RecycleDummy(dummy, 0f);
+                    var dummy = unit.FromWCSharp(DummySystem.GetDummy());
+                    dummy.X = curr.X;
+                    dummy.Y = curr.Y;
+                    dummy.AddAbility((int)AbilityId.Silence);
+                    ModifyDuration(dummy, (int)AbilityId.Silence, dummy.GetAbility((int)AbilityId.Silence), duration);
+                    dummy.IssueOrder(Constants.ORDER_DRUNKEN_HAZE, curr);
+                    DummySystem.RecycleDummy(dummy.Cast<WCSharp.Api.unit>(), 0f);
                 }
 
                 size--;
@@ -452,8 +454,8 @@ namespace Source.Shared
         /// <param name="duration">How long should it last</param>
         public static void Silence(float x, float y, float radius, float duration)
         {
-            GroupClear(g);
-            GroupEnumUnitsInRange(g, x, y, radius, null);
+            g.Clear();
+            g.EnumUnitsInRange(x, y, radius);
             Silence(g, duration);
         }
 
@@ -464,14 +466,13 @@ namespace Source.Shared
         /// <param name="duration">How long should it last</param>
         public static void Stun(unit target, float duration)
         {
-            unit dummy = DummySystem.GetDummy();
-
-            SetUnitX(dummy, GetUnitX(target));
-            SetUnitY(dummy, GetUnitY(target));
-            UnitAddAbility(dummy, (int)AbilityId.Stun);
-            ModifyDuration(dummy, (int)AbilityId.Stun, BlzGetUnitAbility(dummy, (int)AbilityId.Stun), duration);
-            IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, target);
-            DummySystem.RecycleDummy(dummy, 0f);
+            var dummy = unit.FromWCSharp(DummySystem.GetDummy());
+            dummy.X  = target.X;
+            dummy.Y = target.Y;
+            dummy.AddAbility((int)AbilityId.Stun);
+            ModifyDuration(dummy, (int)AbilityId.Stun, dummy.GetAbility((int)AbilityId.Stun), duration);
+            dummy.IssueOrder(Constants.ORDER_THUNDERBOLT, target);
+            DummySystem.RecycleDummy(dummy.Cast<WCSharp.Api.unit>(), 0f);
         }
 
         /// <summary>
@@ -490,13 +491,13 @@ namespace Source.Shared
                 curr = BlzGroupUnitAt(target, 0);
                 if (curr != null && UnitAlive(curr))
                 {
-                    unit dummy = DummySystem.GetDummy();
-                    SetUnitX(dummy, GetUnitX(curr));
-                    SetUnitY(dummy, GetUnitY(curr));
-                    UnitAddAbility(dummy, (int)AbilityId.Stun);
-                    ModifyDuration(dummy, (int)AbilityId.Stun, BlzGetUnitAbility(dummy, (int)AbilityId.Stun), duration);
-                    IssueTargetOrderById(dummy, Constants.ORDER_THUNDERBOLT, curr);
-                    DummySystem.RecycleDummy(dummy, 0f);
+                    var dummy = unit.FromWCSharp(DummySystem.GetDummy());
+                    dummy.X = curr.X;
+                    dummy.Y = curr.Y;
+                    dummy.AddAbility((int)AbilityId.Stun);
+                    ModifyDuration(dummy, (int)AbilityId.Stun, dummy.GetAbility((int)AbilityId.Stun), duration);
+                    dummy.IssueOrder(Constants.ORDER_THUNDERBOLT, curr);
+                    DummySystem.RecycleDummy(dummy.Cast<WCSharp.Api.unit>(), 0f);
                 }
 
                 size--;
@@ -512,8 +513,8 @@ namespace Source.Shared
         /// <param name="duration">How long should it last</param>
         public static void Stun(float x, float y, float radius, float duration)
         {
-            GroupClear(g);
-            GroupEnumUnitsInRange(g, x, y, radius, null);
+            g.Clear();
+            g.EnumUnitsInRange(x, y, radius);
             Stun(g, duration);
         }
     }

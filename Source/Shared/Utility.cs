@@ -56,5 +56,62 @@ namespace Source.Shared
                 dictionary[i] = value;
             }
         }
+
+        /// <summary>
+        /// As it name suggest
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static byte[] GetBytes(string str)
+        {
+            if (str == null) throw new ArgumentNullException(nameof(str), "Input can not be null!");
+            var length = str.Length;
+            if (length == 1) return new byte[1] { (byte)str[0] };
+            var result = new byte[length];
+            for (int i = 0; i < length; i++)
+                result[i] = (byte)str[i];
+
+            return result;
+        }
+
+        /// <summary>
+        /// As it name suggest, convert an array of bytes into character
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        public static string FromBytes(byte[] bytes)
+        {
+            if (bytes == null) throw new ArgumentNullException(nameof(bytes));
+            var length = bytes.Length;
+            var result = new StringBuilder(length);
+            for (int i = 0; i < length; i++)
+            {
+                result.Append(bytes[i]);
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Add <paramref name="flagValue"/> flag to <paramref name="baseValue"/>.
+        /// </summary>
+        /// <param name="baseValue"></param>
+        /// <param name="flagValue"></param>
+        /// <returns></returns>
+        public static int FlagAdd(int baseValue, int flagValue)
+        {
+            return baseValue | flagValue;
+        }
+
+        /// <summary>
+        /// Remove <paramref name="flagValue"/> flag from <paramref name="baseValue"/>.
+        /// </summary>
+        /// <param name="baseValue"></param>
+        /// <param name="flagValue"></param>
+        /// <returns></returns>
+        public static int FlagRemove(int baseValue, int flagValue)
+        {
+            return baseValue & (~flagValue);
+        }
     }
 }

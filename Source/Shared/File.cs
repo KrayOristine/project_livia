@@ -23,14 +23,14 @@ using System;
 namespace Source.Shared
 {
 
-    public sealed class FileIO
+    public sealed class File
     {
         private static readonly int DummyAbility = 1179209521; // 'FIO1'
         private static readonly int PreloadLimit = 258;
-        private static readonly char EscapeChar = Lua.String.Char(27);
+        private static readonly string EscapeChar = Lua.String.Char(27);
         private static readonly string EscapeSelf = Lua.String.Char(27, 27);
         private static readonly string EscapeQuote = Lua.String.Char(27, 113);
-        private static readonly Stack<FileIO> cache = new();
+        private static readonly Stack<File> cache = new();
 
         private static string Escape(string contents)
         {
@@ -50,7 +50,7 @@ namespace Source.Shared
         private bool closed;
         private readonly StringBuilder buffer;
 
-        private FileIO(string fileName)
+        private File(string fileName)
         {
             this.fileName = fileName;
             buffer = new();
@@ -61,9 +61,9 @@ namespace Source.Shared
         /// </summary>
         /// <param name="path">Path to the file</param>
         /// <returns>a File instance</returns>
-        public static FileIO Open(string path)
+        public static File Open(string path)
         {
-            FileIO file;
+            File file;
             if (cache.Count > 0)
             {
                 file = cache.Pop();
@@ -82,10 +82,12 @@ namespace Source.Shared
         /// Write to the file buffer
         /// </summary>
         /// <param name="text"></param>
-        public void Write(string text)
+        /// <returns>The same object that you interacted with</returns>
+        public File Write(string text)
         {
-            if (closed) return;
+            if (closed) return this;
             buffer.Append(text);
+            return this;
         }
 
         /// <summary>
@@ -95,16 +97,18 @@ namespace Source.Shared
         /// <return>A string contents of a file</return>
         public string Read(bool close = false)
         {
+            if (closed) return "";
             Preloader(fileName);
 
             string preloadText = BlzGetAbilityTooltip(DummyAbility, 0);
-            BlzSetAbilityIcon(DummyAbility, "( Empty Lmao )");
+            BlzSetAbilityIcon(DummyAbility, "( None )");
 
-            if (preloadText != null && preloadText != "( Empty Lmao)") buffer.Append(Unescape(preloadText));
+            if (preloadText != null && preloadText != "( None )") buffer.Append(Unescape(preloadText));
 
             if (close)
             {
-                Close();
+                cache.Push(this);
+                closed = true;
             }
 
             return buffer.ToString();
@@ -120,11 +124,33 @@ namespace Source.Shared
                 string contents = Escape(buffer.ToString());
                 PreloadGenClear();
                 PreloadGenStart();
-
                 Preload("\")\n//!beginusercode\nlocal o={}\nPreload=function(s)o[#o+1]=s end\nPreloadEnd=function()end\n//!endusercode\n//");
-                for (int i = 0; i < contents.Length; i++) Preload(contents.Substring(i * PreloadLimit, PreloadLimit));
-                Preload("\")\n//!beginusercode\nBlzSetAbilityTooltip(" + DummyAbility + ",table.concat(o),0)\n//!endusercode\n//");
 
+                var byteLength = contents.Length;
+                var charLength = Utf8.Len(contents).Get<int>(1);
+                var currentIndex = 0;
+                var loopLimit = byteLength / PreloadLimit;
+                for (int i = 0; i < loopLimit; i++)
+                {
+                    var lastCharIndex = currentIndex > 0 ? currentIndex - 1 : currentIndex;
+                    var lastByteIndex = (i + 1) * PreloadLimit - 1;
+
+                    while (true)
+                    {
+                        if (currentIndex > charLength) break;
+
+                        var nextCharIndex = Utf8.Offset(contents, currentIndex + 1);
+                        if (nextCharIndex > lastByteIndex) break;
+                        else currentIndex++;
+                    }
+
+                    var firstByteZeroBasedIndex = Utf8.Offset(contents, lastCharIndex + 1) - 1;
+                    var lastByteZeroBasedIndex = Utf8.Offset(contents, currentIndex) - 1;
+
+                    Preload(contents.Substring(firstByteZeroBasedIndex, lastByteZeroBasedIndex).Replace("\"", "\\\""));
+                }
+
+                Preload("\")\n//!beginusercode\nBlzSetAbilityTooltip(" + DummyAbility + ",table.concat(o),0)\n//!endusercode\n//");
                 PreloadGenEnd(fileName);
             }
 

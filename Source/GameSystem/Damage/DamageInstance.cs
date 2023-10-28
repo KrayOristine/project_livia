@@ -15,15 +15,8 @@
 // </copyright>
 // ------------------------------------------------------------------------------
 using System.Collections.Generic;
+using System;
 using static War3Api.Common;
-
-/*
-    Warcraft 3 C# Damage Engine
-    This was made by converting Bribe Damage Engine from Lua and JASS into C#
-    This converted version includes minor changes to the engine to optimize it
-
-    Current Version: 1.0
- */
 
 namespace Source.GameSystem.Damage
 {
@@ -31,27 +24,26 @@ namespace Source.GameSystem.Damage
     {
         private unit source;
         private unit target;
-        public int SourceType;
-        public int TargetType;
-        public player SourcePlayer;
-        public player TargetPlayer;
-        public float Damage;
-        public bool IsAttack;
-        public bool IsRanged;
+        internal DamageTrigger? Recursive { get; set; }
 
-        //TODO: Make this become bit field
-        public List<bool> Flags;
-        //!---------------------------------
+        public int SourceType { get; private set; }
+        public int TargetType { get; private set; }
+        public player SourcePlayer { get; private set; }
+        public player TargetPlayer { get; private set; }
+        public float Damage { get; set; }
+        public bool IsAttack { get; set; }
+        public bool IsRanged { get; set; }
 
-        public attacktype AttackType;
-        public damagetype DamageType;
-        public weapontype WeaponType;
-        public float PrevAmt;
-        private attacktype prevAttackType;
-        private damagetype prevDamageType;
-        private weapontype prevWeaponType;
-        internal DamageTrigger? recursive;
-        public bool IsEmpty;
+        /// <summary>
+        /// Bit-field. See <see cref="DamageFlag"/> for better information on which bit is represent which flag
+        /// </summary>
+        public int Flags { get; set; }
+
+        public attacktype AttackType { get; set; }
+        public damagetype DamageType { get; set; }
+        public weapontype WeaponType { get; set; }
+        public float PrevAmt { get; private set; }
+        public bool IsEmpty { get; private set; }
 
         //! Internal cache
         private static readonly Stack<DamageInstance> cache = new();
@@ -76,9 +68,9 @@ namespace Source.GameSystem.Damage
             }
         }
 
-        public weapontype PrevWeaponType { get => prevWeaponType; private set => prevWeaponType = value; }
-        public damagetype PrevDamageType { get => prevDamageType; private set => prevDamageType = value; }
-        public attacktype PrevAttackType { get => prevAttackType; private set => prevAttackType = value; }
+        public weapontype PrevWeaponType { get; private set; }
+        public damagetype PrevDamageType { get; private set; }
+        public attacktype PrevAttackType { get; private set; }
 
         public void Update(unit source, unit target, float damage, bool isAttack, bool isRanged, attacktype attackType, damagetype damageType, weapontype weaponType)
         {
@@ -94,7 +86,7 @@ namespace Source.GameSystem.Damage
             WeaponType = weaponType;
             IsAttack = isAttack;
             IsRanged = isRanged;
-            Flags = new();
+            Flags = 0;
             PrevAmt = damage;
             PrevAttackType = attackType;
             PrevDamageType = damageType;
@@ -104,6 +96,7 @@ namespace Source.GameSystem.Damage
 
         public static void Recycle(DamageInstance d)
         {
+            if (d == null) throw new ArgumentNullException(nameof(d), "Damage instance is null");
             d.IsEmpty = true;
             cache.Push(d);
         }
@@ -124,11 +117,26 @@ namespace Source.GameSystem.Damage
             IsRanged = irgd;
             Flags = new();
             PrevAmt = dmg;
-            prevAttackType = tatk;
-            prevDamageType = tdmg;
-            prevWeaponType = twpn;
+            PrevAttackType = tatk;
+            PrevDamageType = tdmg;
+            PrevWeaponType = twpn;
             IsEmpty = false;
-            recursive = null;
+            Recursive = null;
+        }
+
+        public bool HasFlag(DamageFlag whichFlag)
+        {
+            return (Flags & (int)whichFlag) > 0;
+        }
+
+        public void AddFlag(DamageFlag flag)
+        {
+            Flags |= (int)flag;
+        }
+
+        public void RemoveFlag(DamageFlag flag)
+        {
+            Flags &= ~(int)flag;
         }
 
         public static DamageInstance Create(unit source, unit target, float damage, bool isAttack, bool isRanged, attacktype attackType, damagetype damageType, weapontype weaponType)
