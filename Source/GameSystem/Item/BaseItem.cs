@@ -42,43 +42,43 @@ namespace Source.GameSystem.Item
         /// <summary>
         /// Level of this item
         /// </summary>
-        public uint Level { get; private set; } = 0;
+        public int Level { get; private set; } = 0;
         /// <summary>
         /// Level requirement to wield this item
         /// </summary>
-        public uint LevelRequirement { get; private set; } = 0;
+        public int LevelRequirement { get; private set; } = 0;
         /// <summary>
         /// Class limitation, like it name suggest..., limit this item to only be wield-able by all of the class it defined <br/>
-        /// This is a bit-field, for more information please see <see cref="HeroClass.ClassType"/>
+        /// This is a bit-field, for more information please see <see cref="HeroClass"/>
         /// </summary>
-        public uint ClassLimitation { get; private set; } = 0;
+        public int ClassLimitation { get; private set; } = 0;
         /// <summary>
         /// Rarity of the item<br/>
         /// This is a bit-field but only higher bit is used, other lower one are ignored<br/>
-        /// for more information please see <see cref="ItemBitField.Rarities"/>
+        /// for more information please see <see cref="ItemBitField.ItemRarityFlag"/>
         /// </summary>
-        public uint Rarity { get; private set; } = 0;
+        public int Rarity { get; private set; } = 0;
         /// <summary>
         /// Item type, a single item can have multiple types<br/>
-        /// This is a bit-field, for more information please see <see cref="ItemBitField.Types"/>
+        /// This is a bit-field, for more information please see <see cref="ItemBitField.ItemTypeFlag"/>
         /// </summary>
-        public uint Type { get; private set; } = 0;
+        public int Type { get; private set; } = 0;
         /// <summary>
         /// Item prefix, a single item could have more one prefix<br/>
-        /// This is a bit-field, for more information please see <see cref="ItemBitField.Prefixes"/>
+        /// This is a bit-field, for more information please see <see cref="ItemBitField.ItemPrefixFlag"/>
         /// </summary>
-        public uint Prefix { get; private set; } = 0;
+        public int Prefix { get; private set; } = 0;
 
         /// <summary>
         /// Item suffix, a single item could have more than one suffix<br/>
-        /// This is a bit-field, for more information please see <see cref="ItemBitField.Suffixes"/>
+        /// This is a bit-field, for more information please see <see cref="ItemBitField.ItemSuffixFlag"/>
         /// </summary>
-        public uint Suffix { get; private set; } = 0;
+        public int Suffix { get; private set; } = 0;
         /// <summary>
         /// Item flags, a single can have multiple flag at once<br/>
-        /// This is a bit-field, for more information please see <see cref="ItemBitField.Flags"/>
+        /// This is a bit-field, for more information please see <see cref="ItemBitField.ItemInternalFlag"/>
         /// </summary>
-        public uint Flags { get; private set; } = 0;
+        public int Flags { get; private set; } = 0;
 
         /// <summary>
         /// Check if a target is qualified to wield this item.
@@ -88,9 +88,9 @@ namespace Source.GameSystem.Item
         public bool IsMatchRequirement(unit wieldTarget)
         {
             if (wieldTarget == null) return false;
-            if (ClassLimitation != (uint)HeroClass.ClassType.None && (ClassLimitation & HeroClass.GetClassType(wieldTarget)) > 0) return false;
+            if (ClassLimitation != 0 && !PlayerHero.FromUnit(wieldTarget).IsClass(ClassLimitation)) return false;
             if (GetUnitLevel(wieldTarget) < LevelRequirement) return false;
-            if ((Flags & (uint)ItemBitField.Flags.Disabled) > 0) return false;
+            if ((Flags & (uint)ItemBitField.ItemInternalFlag.Disabled) > 0) return false;
             return true;
         }
 

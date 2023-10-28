@@ -44,5 +44,30 @@ namespace Source.Shared
         {
             DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, string.Format("[{0}]: {1}", className, message));
         }
+
+        public static void DebugSingle(string message)
+        {
+            DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, string.Format("[|c000000ffDEBUG|r]: {0}", message));
+        }
+
+        public static void VerboseSingle(string message)
+        {
+            DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, string.Format("[|c00ffff00VERBOSE|r]: {0}", message));
+        }
+
+        public static void ErrorSingle(string message)
+        {
+            DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, string.Format("[|c00ff0000ERROR|r]: {0}", message));
+        }
+
+        public static void WarningSingle(string message)
+        {
+            DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, string.Format("[|c00ffff00WARN|r]: {0}", message));
+        }
+
+        public static void LogSingle(string message)
+        {
+            DisplayTextToPlayer(GetLocalPlayer(), 0, 0.25f, message);
+        }
     }
 }

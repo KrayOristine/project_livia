@@ -18,13 +18,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Source.GameSystem.Stats;
 using Source.Shared;
 using static War3Api.Common;
 
 namespace Source.GameSystem.Damage
 {
     /// <summary>
-    /// The one that handle all of the common modifier calculation for the damage instance<br/>
+    /// The one that _handle all of the common modifier calculation for the damage instance<br/>
     /// Including:
     /// <list type="number">
     /// <item>Damage and Armor mitigation</item>
@@ -101,12 +102,12 @@ namespace Source.GameSystem.Damage
             /// </summary>
             AOE_AFTER_CRITICAL,
             /// <summary>
-            /// Run AFTER ALL damage calculation and WHEN THE DAMAGE is HIGHER OR EQUAL to the TARGET CURRENT life
+            /// Run AFTER ALL damage calculation and WHEN THE DAMAGE is ENOUGH to kill the target
             /// </summary>
             ON_LETHAL,
         }
 
-        private static readonly Dictionary<unit, Dictionary<ModifierEvent, float>> modTable = new();
+
 
         /// <summary>
         /// Add a modifier to the target unit
@@ -132,39 +133,56 @@ namespace Source.GameSystem.Damage
 
 #pragma warning disable S1144 // Unused private types or members should be removed
         private static readonly LinkedListNode<DamageTrigger> t1 = Engine.Register(DamageEvent.DAMAGE, 0, OnDamage);
-        private static readonly LinkedListNode<DamageTrigger> t2 = Engine.Register(DamageEvent.ARMOR, 0, OnDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t2 = Engine.Register(DamageEvent.ARMOR, 0, OnArmor);
         private static readonly LinkedListNode<DamageTrigger> t3 = Engine.Register(DamageEvent.DAMAGED, 0, OnDamaged);
         private static readonly LinkedListNode<DamageTrigger> t4 = Engine.Register(DamageEvent.AFTER, 0, AfterDamaged);
-        private static readonly LinkedListNode<DamageTrigger> t5 = Engine.Register(DamageEvent.LETHAL, 0, AOEDamaged);
+        private static readonly LinkedListNode<DamageTrigger> t5 = Engine.Register(DamageEvent.SOURCE, 0, AOEDamaged);
         private static readonly LinkedListNode<DamageTrigger> t6 = Engine.Register(DamageEvent.LETHAL, 0, LethalDamaged);
+        private static unit source;
+        private static unit target;
+        private static float damage;
 #pragma warning restore S1144 // Unused private types or members should be removed
 
-        public static void OnDamage()
+        /// <summary>
+        /// This value is set every damage instance
+        /// </summary>
+        public static bool Evaded = false;
+
+        private static void OnDamage()
+        {
+            source = Engine.Current.Source;
+            target = Engine.Current.Target;
+            damage = Engine.Current.Damage;
+        }
+
+        private static void OnArmor()
         {
 
         }
 
-        public static void OnArmor()
+        private static void OnDamaged()
+        {
+            var random = GetRandomReal(0, 100);
+            var evasion = StatSystem.Get(StatType.EVASION, target, Mode.TOTAL);
+            evasion = (evasion / (evasion + 1000));
+            if (random <= evasion)
+            {
+                damage *= 0.4f;
+                Evaded = true;
+            }
+        }
+
+        private static void AfterDamaged()
         {
 
         }
 
-        public static void OnDamaged()
+        private static void AOEDamaged()
         {
 
         }
 
-        public static void AfterDamaged()
-        {
-
-        }
-
-        public static void AOEDamaged()
-        {
-
-        }
-
-        public static void LethalDamaged()
+        private static void LethalDamaged()
         {
 
         }

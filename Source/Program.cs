@@ -94,7 +94,7 @@ namespace Source
         private static void InitFrame()
         {
             Progress += 10;
-            Frame.HideOriginFrames(true);
+            Frame.HideOrigin(true);
             Frame.GetByName("ConsoleUIBackdrop", 0).SetSize(0, 0.0001f);
 
             SaveSlot.Init();
@@ -116,8 +116,8 @@ namespace Source
                 PlayerUnitEvents.EnableDebug();
                 SyncSystem.EnableDebug();
 
-                CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
-                CreateUnit(Player(0), FourCC("hfoo"), 0, 0, 0);
+                CreateUnit(Player(0), "hfoo".FourCC(), 0, 0, 0);
+                CreateUnit(Player(0), "hfoo".FourCC(), 0, 0, 0);
 #endif
                 DisplayTimedTextToPlayer(GetLocalPlayer(), 0, 0, 100, "|c00ff0000WARNING|r: Map initialization phase begin, HUGE LAGE INCOMING");
                 SetCinematicScene(0, PLAYER_COLOR_RED, "???", "Map initialization phase is now started, current process: " + _process + "%", 100, 0);

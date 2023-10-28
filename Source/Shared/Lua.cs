@@ -18,6 +18,7 @@
 // Ignore Spelling: Metatable Metatables rhs lhs Yieldable Utf repl tbl Acos Atan Asin
 
 using System;
+using System.ComponentModel;
 
 namespace Source.Shared
 {
@@ -141,7 +142,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}))"
         public static extern (bool, dynamic) PCall(Action func);
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}))"
         public static extern (bool, dynamic) PCall<T1>(Action<T1> func, T1 arg1);
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}))"
         public static extern (bool, dynamic) PCall<T1, T2>(Action<T1, T2> func, T1 arg1, T2 arg2);
 
         /// <summary>
@@ -171,7 +172,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3>(Action<T1, T2, T3> func, T1 arg1, T2 arg2, T3 arg3);
 
         /// <summary>
@@ -181,7 +182,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4>(Action<T1, T2, T3, T4> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4);
 
         /// <summary>
@@ -191,7 +192,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
 
         /// <summary>
@@ -201,7 +202,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5}, {6})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 
         /// <summary>
@@ -211,7 +212,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
 
         /// <summary>
@@ -221,7 +222,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}))"
         public static extern (bool, dynamic) PCall<TOut>(Func<TOut> func);
 
         /// <summary>
@@ -231,7 +232,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}))"
         public static extern (bool, dynamic) PCall<T1, TOut>(Func<T1, TOut> func, T1 arg1);
 
         /// <summary>
@@ -241,7 +242,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}))"
         public static extern (bool, dynamic) PCall<T1, T2, TOut>(Func<T1, T2, TOut> func, T1 arg1, T2 arg2);
 
         /// <summary>
@@ -251,7 +252,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, TOut>(Func<T1, T2, T3, TOut> func, T1 arg1, T2 arg2, T3 arg3);
 
         /// <summary>
@@ -261,7 +262,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, TOut>(Func<T1, T2, T3, T4, TOut> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4);
 
         /// <summary>
@@ -271,7 +272,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5, TOut>(Func<T1, T2, T3, T4, T5, TOut> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
 
         /// <summary>
@@ -281,7 +282,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5}, {6})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5, T6, TOut>(Func<T1, T2, T3, T4, T5, T6, TOut> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 
         /// <summary>
@@ -291,7 +292,7 @@ namespace Source.Shared
         /// In case of any error, pcall returns false plus the error message.
         /// </summary>
         /// <param name="func"></param>
-        /// @CSharpLua.Template = "pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})"
+        /// @CSharpLua.Template = "System.ValueTuple(pcall({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}))"
         public static extern (bool, dynamic) PCall<T1, T2, T3, T4, T5, T6, T7, TOut>(Func<T1, T2, T3, T4, T5, T6, T7, TOut> func, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
 
         /// <summary>
@@ -338,6 +339,14 @@ namespace Source.Shared
         /// <returns></returns>
         /// @CSharpLua.Template = "rawlen({0})"
         public static extern int RawLen(Table table);
+
+        /// <summary>
+        /// Get the length of any object if possible
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        /// @CSharpLua.Template = "#{0}"
+        public static extern int Len(object obj);
 
         /// <summary>
         /// Return the length of the string without invoking __len metamethod
@@ -464,34 +473,16 @@ namespace Source.Shared
             /// <param name="n"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "{0} ^ {1}"
-            public static extern int Pow(int x, int n);
-
-            /// <summary>
-            /// Return the result of x to the power of n
-            /// </summary>
-            /// <param name="x"></param>
-            /// <param name="n"></param>
-            /// <returns></returns>
-            /// @CSharpLua.Template = "{0} ^ {1}"
             public static extern float Pow(float x, float n);
 
             /// <summary>
-            /// Return the result of x to the power of n
+            /// Return the absolute value of x
             /// </summary>
             /// <param name="x"></param>
-            /// <param name="n"></param>
             /// <returns></returns>
-            /// @CSharpLua.Template = "{0} ^ {1}"
-            public static extern int Pow(int x, float n);
-
-            /// <summary>
-            /// Return the result of x to the power of n
-            /// </summary>
-            /// <param name="x"></param>
-            /// <param name="n"></param>
-            /// <returns></returns>
-            /// @CSharpLua.Template = "{0} ^ {1}"
-            public static extern int Pow(float x, int n);
+            /// <remarks>(integer/float)</remarks>
+            /// @CSharpLua.Template = "math.abs({0})"
+            public static extern int Abs(int x);
 
             /// <summary>
             /// Return the absolute value of x
@@ -500,16 +491,7 @@ namespace Source.Shared
             /// <returns></returns>
             /// <remarks>(integer/float)</remarks>
             /// @CSharpLua.Template = "math.abs({0})"
-            public static extern dynamic Abs(int x);
-
-            /// <summary>
-            /// Return the absolute value of x
-            /// </summary>
-            /// <param name="x"></param>
-            /// <returns></returns>
-            /// <remarks>(integer/float)</remarks>
-            /// @CSharpLua.Template = "math.abs({0})"
-            public static extern dynamic Abs(float x);
+            public static extern float Abs(float x);
 
             /// <summary>
             /// Return the arc cosine of x (in radians)
@@ -517,7 +499,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.acos({0})"
-            public static extern int Acos(int x);
+            public static extern float Acos(int x);
 
             /// <summary>
             /// Return the arc cosine of x (in radians)
@@ -533,7 +515,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.asin({0})"
-            public static extern int Asin(int x);
+            public static extern float Asin(int x);
 
             /// <summary>
             /// Return the arc sine of x (in radians)
@@ -550,7 +532,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.atan({0}, {1})"
-            public static extern int Atan(int y, int x = 1);
+            public static extern float Atan(int y, int x = 1);
 
             /// <summary>
             /// Returns the arc tangent of y/x (in radians), but uses the signs of both arguments to find the quadrant of the result. (It also handles correctly the case of x being zero.)
@@ -583,7 +565,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.cos({0})"
-            public static extern int Cos(int x);
+            public static extern float Cos(int x);
 
             /// <summary>
             /// Returns the cosine of x (assumed to be in radians).
@@ -599,7 +581,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.sin({0})"
-            public static extern int Sin(int x);
+            public static extern float Sin(int x);
 
             /// <summary>
             /// Returns the sine of x (assumed to be in radians).
@@ -615,7 +597,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.tan({0})"
-            public static extern int Tan(int x);
+            public static extern float Tan(int x);
 
             /// <summary>
             /// Returns the tangent of x (assumed to be in radians).
@@ -630,15 +612,15 @@ namespace Source.Shared
             /// </summary>
             /// <param name="x"></param>
             /// <returns></returns>
-            /// @CSharpLua.Template = "math.reg({0})"
-            public static extern int Deg(int x);
+            /// @CSharpLua.Template = "math.deg({0})"
+            public static extern float Deg(int x);
 
             /// <summary>
             /// Converts the angle x from radians to degrees.
             /// </summary>
             /// <param name="x"></param>
             /// <returns></returns>
-            /// @CSharpLua.Template = "math.reg({0})"
+            /// @CSharpLua.Template = "math.deg({0})"
             public static extern float Deg(float x);
 
             /// <summary>
@@ -647,7 +629,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.rad({0})"
-            public static extern int Rad(int x);
+            public static extern float Rad(int x);
 
             /// <summary>
             /// Converts the angle x from degrees to radians.
@@ -663,7 +645,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.sqrt({0})"
-            public static extern int Sqrt(int x);
+            public static extern float Sqrt(int x);
 
             /// <summary>
             /// Returns the square root of x. (You can also use the expression x^0.5 to compute this value.)
@@ -679,7 +661,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.exp({0})"
-            public static extern int Exp(int x);
+            public static extern float Exp(int x);
 
             /// <summary>
             /// Returns the value e to the power of x (where e is the base of natural logarithms).
@@ -703,7 +685,7 @@ namespace Source.Shared
             /// <param name="x"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.floor({0})"
-            public static extern float Floor(float x);
+            public static extern int Floor(float x);
 
             /// <summary>
             /// Returns the remainder of the division of x by y that rounds the quotient towards zero.
@@ -713,7 +695,7 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.fmod({0}, {1})"
-            public static extern dynamic FMod(int x, int y);
+            public static extern int FMod(int x, int y);
 
             /// <summary>
             /// Returns the remainder of the division of x by y that rounds the quotient towards zero.
@@ -723,7 +705,7 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.fmod({0}, {1})"
-            public static extern dynamic FMod(float x, float y);
+            public static extern float FMod(float x, float y);
 
             /// <summary>
             /// Returns the logarithm of x in the given base. The default for base is e (so that the function returns the natural logarithm of x).
@@ -732,7 +714,7 @@ namespace Source.Shared
             /// <param name="_base"></param>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.log({0}, {1})"
-            public static extern int Log(int x, int? _base);
+            public static extern float Log(int x, int? _base);
 
             /// <summary>
             /// Returns the logarithm of x in the given base. The default for base is e (so that the function returns the natural logarithm of x).
@@ -750,7 +732,7 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.max({*0})"
-            public static extern dynamic Max(params int[] x);
+            public static extern int Max(params int[] x);
 
             /// <summary>
             /// Returns the argument with the maximum value, according to the Lua operator <
@@ -759,7 +741,7 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.max({*0})"
-            public static extern dynamic Max(params float[] x);
+            public static extern float Max(params float[] x);
 
             /// <summary>
             /// Returns the argument with the minimum value, according to the Lua operator <
@@ -768,7 +750,7 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.min({*0})"
-            public static extern dynamic Min(params int[] x);
+            public static extern int Min(params int[] x);
 
             /// <summary>
             /// Returns the argument with the minimum value, according to the Lua operator <
@@ -777,14 +759,14 @@ namespace Source.Shared
             /// <remarks>(integer/float)</remarks>
             /// <returns></returns>
             /// @CSharpLua.Template = "math.min({*0})"
-            public static extern dynamic Min(params float[] x);
+            public static extern float Min(params float[] x);
 
             /// <summary>
             /// Returns the integral part of x and the fractional part of x. Its second result is always a float.
             /// </summary>
             /// <param name="x"></param>
-            /// <returns></returns>
-            /// @CSharpLua.Template = "math.modf({0})"
+            /// <returns>A table which the first index is the integral part of x and the second result is the fractional part of x that is always a float!</returns>
+            /// @CSharpLua.Template = "System.ValueTuple(math.modf({0}))"
             public static extern (int, float) ModF(float x);
 
             /// <summary>
@@ -939,6 +921,13 @@ namespace Source.Shared
             /// @CSharpLua.Template = "{this}[{0}] = {1}"
             public extern void Set<TVal>(dynamic key, TVal value);
 
+            /// <summary>
+            /// Push a value to the end of a table
+            /// </summary>
+            /// <typeparam name="TVal"></typeparam>
+            /// <param name="value"></param>
+            /// @CSharpLua.Template = "{this}[#{this}+1] = {1}"
+            public extern void Push<TVal>(TVal value);
 
             /// <summary>
             /// Create a lua table
@@ -1011,10 +1000,23 @@ namespace Source.Shared
             /// <summary>
             /// Unpack all element from the given table and return all of it
             /// </summary>
-            /// <param name="table"></param>
             /// <returns></returns>
-            /// @CSharpLua.Template = "table.unpack({0}, {1}, {2})"
-            public static extern dynamic Unpack(Table table, int? i, int? j);
+            /// @CSharpLua.Template = "table.unpack({this})"
+            public extern dynamic Unpack();
+
+            /// <summary>
+            /// Unpack all element from the given table and return all of it
+            /// </summary>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "table.unpack({this}), {0}"
+            public extern dynamic Unpack(int i);
+
+            /// <summary>
+            /// Unpack all element from the given table and return all of it
+            /// </summary>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "table.unpack({this}, {0}, {1})"
+            public extern dynamic Unpack(int i, int j);
 
             /// <summary>
             /// Typecast the <paramref name="table"/> to the given type <typeparamref name="TOut"/><br/>
@@ -1050,6 +1052,13 @@ namespace Source.Shared
             /// </summary>
             /// @CSharpLua.Template = "#{this}"
             public readonly int Length;
+
+            /// <summary>
+            ///
+            /// </summary>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "tostring({this})"
+            public extern override string ToString();
         }
 
         /// <summary>
@@ -1099,7 +1108,7 @@ namespace Source.Shared
             /// <param name="b">A byte value to convert</param>
             /// <returns>A character that is corresponding to the given byte</returns>
             /// @CSharpLua.Template = "string.char({0})"
-            public static extern char Char(byte b);
+            public static extern string Char(byte b);
 
             /// <summary>
             /// Convert given numeric byte to it corresponding character and concatenate them together
@@ -1435,6 +1444,31 @@ namespace Source.Shared
             /// </returns>
             /// @CSharpLua.Template = "{ utf8.len({0}, {1}, {2}) }"
             public static extern Table Len(string str, int i = 1, int j = -1);
+
+            /// <summary>
+            /// Returns the position (in bytes) where the encoding of the n-th character of s (counting from position i) starts. A negative n gets characters before position i. The default for i is 1 when n is non-negative and #s + 1 otherwise, so that utf8.offset(s, -n) gets the offset of the n-th character from the end of the string. If the specified character is neither in the subject nor right after its end, the function returns nil.<br/>
+            /// As a special case, when n is 0 the function returns the start of the encoding of the character that contains the i-th byte of s.<br/>
+            ///
+            /// This function assumes that s is a valid UTF-8 string.
+            /// </summary>
+            /// <param name="str"></param>
+            /// <param name="n"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "utf8.offset({0}, {1})"
+            public static extern int Offset(string str, int n);
+
+            /// <summary>
+            /// Returns the position (in bytes) where the encoding of the n-th character of s (counting from position i) starts. A negative n gets characters before position i. The default for i is 1 when n is non-negative and #s + 1 otherwise, so that utf8.offset(s, -n) gets the offset of the n-th character from the end of the string. If the specified character is neither in the subject nor right after its end, the function returns nil.<br/>
+            /// As a special case, when n is 0 the function returns the start of the encoding of the character that contains the i-th byte of s.<br/>
+            ///
+            /// This function assumes that s is a valid UTF-8 string.
+            /// </summary>
+            /// <param name="str"></param>
+            /// <param name="n"></param>
+            /// <param name="i"></param>
+            /// <returns></returns>
+            /// @CSharpLua.Template = "utf8.offset({0}, {1}, {2})"
+            public static extern int Offset(string str, int n, int i);
         }
 
         /// @CSharpLua.Ignore
@@ -1474,7 +1508,7 @@ namespace Source.Shared
             /// Get the running coroutine and the extra boolean stating the coroutine is the main one or not
             /// </summary>
             /// <returns></returns>
-            /// @CSharpLua.Template = "coroutine.running()"
+            /// @CSharpLua.Template = "System.ValueTuple(coroutine.running())"
             public static extern (Coroutine, bool) Running();
 
             /// <summary>

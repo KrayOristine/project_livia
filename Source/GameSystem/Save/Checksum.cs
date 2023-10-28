@@ -30,7 +30,7 @@ namespace Source.GameSystem.Save
         /// </summary>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static double Hash(string buffer)
+        public static int Hash(string buffer)
         {
             int a = 0, b = 0, c = buffer.Length;
             for (int i = 0; i < c; i++)
@@ -42,16 +42,16 @@ namespace Source.GameSystem.Save
             return b * 0x10000 + a;
         }
 
-        private static string ConvertHash(double hash, int mult = 0)
+        private static string ConvertHash(int hash, int mult = 0)
         {
             int loc;
-            if (mult == 0) loc = (int)Math.Floor(hash);
-            else loc = (int)Math.Floor(hash / Math.Pow(checkLength, mult));
+            if (mult == 0) loc = hash;
+            else loc = (int)MathF.Floor(hash / MathF.Pow(checkLength, mult));
 
             StringBuilder res = new();
             res.Append(checkStr[loc]);
             if (mult == 0 && hash > checkLength) res.Append(ConvertHash(hash, 5));
-            return mult == 0 ? res.ToString() : res.Append(ConvertHash(hash / Math.Pow(checkLength, mult), mult - 1)).ToString();
+            return mult == 0 ? res.ToString() : res.Append(ConvertHash((int)MathF.Floor(hash / MathF.Pow(checkLength, mult)), mult - 1)).ToString();
         }
 
         /// <summary>

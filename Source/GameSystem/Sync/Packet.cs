@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 namespace Source.GameSystem.Sync
 {
     /// <summary>
-    /// A class that handle all data-management
+    /// A class that _handle all data-management
     /// </summary>
     public sealed class SyncPacket : IDisposable
     {

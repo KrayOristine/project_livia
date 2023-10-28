@@ -15,48 +15,48 @@
 // </copyright>
 // ------------------------------------------------------------------------------
 using System.Collections.Generic;
-using War3Api;
+using static War3Api.Common;
 
 namespace Source.Shared
 {
     public static class Mouse
     {
-        private static readonly Dictionary<Common.player, float> x = new();
-        private static readonly Dictionary<Common.player, float> y = new();
-        private static readonly Common.trigger trigger = Common.CreateTrigger();
+        private static readonly Dictionary<player, float> x = new();
+        private static readonly Dictionary<player, float> y = new();
+        private static readonly trigger trigger = CreateTrigger();
 
-        public static float GetX(Common.player p)
+        public static float GetX(player p)
         {
             return x[p];
         }
 
-        public static float GetY(Common.player p)
+        public static float GetY(player p)
         {
             return y[p];
         }
 
         public static void OnMouseMoveEvent()
         {
-            var p = Common.GetTriggerPlayer();
+            var p = @event.Player;
 
-            x[p] = Common.BlzGetTriggerPlayerMouseX();
-            y[p] = Common.BlzGetTriggerPlayerMouseY();
+            x[p] = @event.PlayerMouseX;
+            y[p] = @event.PlayerMouseY;
         }
 
         public static void Init()
         {
-            for (int i = 0; i <= Blizzard.bj_MAX_PLAYERS; i++)
+            for (int i = 0; i <= 27; i++)
             {
-                var player = Common.Player(i);
+                var player = new player(i);
                 x[player] = 0;
                 y[player] = 0;
 
-                if (Common.GetPlayerController(player) == Common.MAP_CONTROL_USER && Common.GetPlayerSlotState(player) == Common.PLAYER_SLOT_STATE_PLAYING)
+                if (player.Controller == MAP_CONTROL_USER && player.SlotState == PLAYER_SLOT_STATE_PLAYING)
                 {
-                    Common.TriggerRegisterPlayerEvent(trigger, player, Common.EVENT_PLAYER_MOUSE_MOVE);
+                    trigger.RegisterPlayerEvent(player, EVENT_PLAYER_MOUSE_MOVE);
                 }
             }
-            Common.TriggerAddAction(trigger, OnMouseMoveEvent);
+            trigger.AddAction(OnMouseMoveEvent);
         }
     }
 }

@@ -33,11 +33,11 @@ namespace Source.GameSystem.Save
         public int HASH;
         public List<HeroBank> saveSlots = new();
         private readonly Common.player boundedPlayer;
-        private static readonly List<PlayerBank> banks = new();
+        private static readonly PlayerBank[] banks = new PlayerBank[28];
 
         public static PlayerBank GetPlayerBank(int index)
         {
-            if (index < 0 || index > banks.Count) Logger.Error("PlayerBank", "Illegal Access to player data banks!");
+            if (index < 0 || index > 27) Logger.Error("PlayerBank", "Illegal Access to player data banks!");
             return banks[index];
         }
 

@@ -114,22 +114,22 @@ namespace Source.MapScript
 
         private static string GetDamageColor(List<bool> flags, bool attack, float amount)
         {
-            if (amount < 0.0f || flags[(int)DamageTypes.Heal]) return "|c0096FF96+ "; // green
-            else if (flags[(int)DamageTypes.Pure] || flags[(int)DamageTypes.RAW] || flags[(int)DamageTypes.INTERNAL]) return "|c00FFFFFF"; // white
-            else if (flags[(int)DamageTypes.Evaded] || flags[(int)DamageTypes.Shield]) return "|c00808080"; // gray
-            else if (flags[(int)DamageTypes.Critical]) return "|c00E10600"; // slightly red
-            else if (flags[(int)DamageTypes.Physical] || attack) return "|c00FF7F00"; // orange
-            else if (flags[(int)DamageTypes.Magical] || flags[(int)DamageTypes.Spell]) return "|c002389DA"; // slightly darker blue
-            else if (flags[(int)DamageTypes.Elemental])
+            if (amount < 0.0f || flags[(int)DamageFlag.Heal]) return "|c0096FF96+ "; // green
+            else if (flags[(int)DamageFlag.Pure] || flags[(int)DamageFlag.RAW] || flags[(int)DamageFlag.INTERNAL]) return "|c00FFFFFF"; // white
+            else if (flags[(int)DamageFlag.Evaded] || flags[(int)DamageFlag.Shield]) return "|c00808080"; // gray
+            else if (flags[(int)DamageFlag.Critical]) return "|c00E10600"; // slightly red
+            else if (flags[(int)DamageFlag.Physical] || attack) return "|c00FF7F00"; // orange
+            else if (flags[(int)DamageFlag.Magical] || flags[(int)DamageFlag.Spell]) return "|c002389DA"; // slightly darker blue
+            else if (flags[(int)DamageFlag.Elemental])
             {
-                if (flags[(int)DamageTypes.Fire]) return "|c00CD001A"; // cherry red
-                else if (flags[(int)DamageTypes.Water]) return "|c0074CCF4"; // very light blue
-                else if (flags[(int)DamageTypes.Nature]) return "|c002D5A27"; // green leaf color
-                else if (flags[(int)DamageTypes.Metal]) return "|c00FFCC00"; // UCS gold
-                else if (flags[(int)DamageTypes.Wind]) return "|c00D1F1F9"; // wind
-                else if (flags[(int)DamageTypes.Lightning]) return "|c00C8A2C8"; // lilac
-                else if (flags[(int)DamageTypes.Light]) return "|c00FFFFED"; // light yellow
-                else if (flags[(int)DamageTypes.Dark]) return "|c0039254D"; // dark purple
+                if (flags[(int)DamageFlag.Fire]) return "|c00CD001A"; // cherry red
+                else if (flags[(int)DamageFlag.Water]) return "|c0074CCF4"; // very light blue
+                else if (flags[(int)DamageFlag.Nature]) return "|c002D5A27"; // green leaf color
+                else if (flags[(int)DamageFlag.Metal]) return "|c00FFCC00"; // UCS gold
+                else if (flags[(int)DamageFlag.Wind]) return "|c00D1F1F9"; // wind
+                else if (flags[(int)DamageFlag.Lightning]) return "|c00C8A2C8"; // lilac
+                else if (flags[(int)DamageFlag.Light]) return "|c00FFFFED"; // light yellow
+                else if (flags[(int)DamageFlag.Dark]) return "|c0039254D"; // dark purple
             }
 
             return "|c00E45AAA"; // Some how it passed all filter, let indicate it a 'error damage'
@@ -138,7 +138,7 @@ namespace Source.MapScript
         private static void NormalDamageTag(DamageInstance d, unit target)
         {
             string colorized;
-            if (d.Flags[(int)DamageTypes.Chaos])
+            if (d.Flags[(int)DamageFlag.Chaos])
             {
                 colorized = Color.GenerateApplyGradient(d.Damage.ToString(), chaosStart, chaosEnd);
             }
@@ -173,7 +173,7 @@ namespace Source.MapScript
 
             if (string.IsNullOrEmpty(stack.Text))
             {
-                if (d.Flags[(int)DamageTypes.Chaos])
+                if (d.Flags[(int)DamageFlag.Chaos])
                 {
                     colorized = Color.GenerateApplyGradient(d.Damage.ToString(), chaosStart, chaosEnd);
                 }
@@ -188,7 +188,7 @@ namespace Source.MapScript
 
             float old = stack.Damage;
             float newDmg = old + d.Damage;
-            if (d.Flags[(int)DamageTypes.Chaos])
+            if (d.Flags[(int)DamageFlag.Chaos])
             {
                 colorized = Color.GenerateApplyGradient(newDmg.ToString(), chaosStart, chaosEnd);
             } else

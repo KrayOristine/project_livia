@@ -12,9 +12,9 @@ namespace Launcher
     public static class MapCompression
     {
         // compression tweaks
-        public const long SMALL_SIZE = 30000000; // 20mb
+        public const long SMALL_SIZE = 30000000; // 30mb
 
-        public const long MEDIUM_SIZE = 70000000; // 50mb
+        public const long MEDIUM_SIZE = 70000000; // 70mb
         // big size is everything else
 
         private static readonly ZopfliOptions compress_small = new()

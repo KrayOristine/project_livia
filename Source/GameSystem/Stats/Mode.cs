@@ -1,5 +1,5 @@
 ﻿// ------------------------------------------------------------------------------
-// <copyright file="Saveable.cs" company="Kray Oristine">
+// <copyright file="ModifyMode.cs" company="Kray Oristine">
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -14,22 +14,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
-using War3Api;
 
-namespace Source.GameSystem.Save
+// Shorthand for Update, since i lazy as fuck
+
+namespace Source.GameSystem.Stats
 {
-    public abstract class Saveable
+    public enum Mode
     {
-        protected readonly Common.player boundedPlayer;
-        protected readonly int boundedSlot;
-
-        protected readonly string hash;
-
-        protected Saveable(Common.player boundPlayer, int boundSlot)
-        {
-            boundedPlayer = boundPlayer;
-            boundedSlot = boundSlot;
-            hash = Checksum.Serialize(boundPlayer.Name + boundSlot.ToString());
-        }
+        BASE,
+        BONUS,
+        TOTAL
     }
 }

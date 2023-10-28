@@ -19,7 +19,7 @@ using System;
 namespace Source.Shared
 {
     /*
-     * Obscured Types
+     * Obscured ItemTypeFlag
      *
      * Protect your values from memory scanning by obfuscating it!
      * Has heavy performance impact when used multiple times without caching

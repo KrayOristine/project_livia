@@ -30,11 +30,11 @@ namespace Source.GameSystem.Save
         /// <summary>
         /// Only modify the list, do not create a new list
         /// </summary>
-        public List<float> Attribute { get; set; } = new()
+        public float[] Attribute { get; set; } = new float[(int)Stats.StatType.OneshotChance+1];
 ;        /// <summary>
         /// Only modify the list, do not create a new list
         /// </summary>
-        public List<bool> Flags { get; set; } = new();
+        public int Flags { get; set; } = 0;
         /// <summary>
         /// The id of the item at the specific slot
         /// </summary>

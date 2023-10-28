@@ -67,17 +67,16 @@ namespace Launcher
         public static string Build()
         {
             // Ensure these folders exist
-            Directory.CreateDirectory(ASSETS_PATH);
-            Directory.CreateDirectory(OUT_ARTIFACTS);
 
             // Load existing map data
-            var map = Map.Open(MAP_PATH);
+            var map = Map.Open(BuilderConfig.MAP_PATH);
 
             // create a list of file that will be add to the result map
             var fileList = new List<MpqFile>();
+            MapAssetManager.
 
             // enumerate the entire assets path and add every thing it found to the list of file
-            AddFiles(ref fileList, ASSETS_PATH, "*", SearchOption.AllDirectories);
+            AddFiles(ref fileList, BuilderConfig.ASSETS_PATH, "*", SearchOption.AllDirectories);
 
             // clear out memory in-case there is some leak happen
             GC.Collect(-1, GCCollectionMode.Optimized, false, true);
@@ -111,7 +110,7 @@ namespace Launcher
 
             //mapArchive.Build(Path.Combine(OUT_ARTIFACTS, OUT_MAP_NAME), archiveCreateOptions);
 
-            return Path.Combine(OUT_ARTIFACTS, OUT_MAP_NAME);
+            return Path.Combine(BuilderConfig.OUT_ARTIFACTS, BuilderConfig.OUT_MAP_NAME);
         }
     }
 }

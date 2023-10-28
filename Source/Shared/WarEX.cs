@@ -20,19 +20,6 @@ namespace Source.Shared
 {
     public static class WarEX
     {
-#pragma warning disable CS0626
-#pragma warning disable S4200
-        /// @CSharpLua.Template = "BlzGetHeroPrimaryStat({0})"
-        public static extern int BlzGetHeroPrimaryStat(Common.unit u);
-
-        /// @CSharpLua.Template = "BlzSetHeroStatEx({0}, {1}, {2})"
-        public static extern void BlzSetHeroStatEx(Common.unit u, int i, int amt);
-
-        /// @CSharpLua.Template = "BlzGetHeroStat({0}, {1})"
-        public static extern int BlzGetHeroStat(Common.unit u, int i);
-#pragma warning restore S4200
-#pragma warning restore CS0626
-
 
         internal static Common.location zeroLoc = Common.Location(0,0);
 
@@ -41,43 +28,6 @@ namespace Source.Shared
         public static string StringHash(string str)
         {
             return Common.StringHash(str).ToString("X");
-        }
-
-        public static int GetHeroPrimary(Common.unit h, bool includeBonus = false)
-        {
-            int i = BlzGetHeroPrimaryStat(h);
-            switch (i)
-            {
-                case 1: return Common.GetHeroStr(h, includeBonus);
-                case 2: return Common.GetHeroInt(h, includeBonus);
-                case 3: return Common.GetHeroAgi(h, includeBonus);
-                default:
-                    Logger.Error("WarEX", "Invalid Primary Stats");
-                    return 0;
-            }
-        }
-
-        public static void SetHeroPrimary(Common.unit h, int newValue, bool add = true)
-        {
-            int i = BlzGetHeroPrimaryStat(h);
-            switch (i)
-            {
-                case 1:
-                    if (add) newValue += Common.GetHeroStr(h, false);
-                    Common.SetHeroStr(h, newValue, true);
-                    break;
-                case 2:
-                    if (add) newValue += Common.GetHeroAgi(h, false);
-                    Common.SetHeroAgi(h, newValue, true);
-                    break;
-                case 3:
-                    if (add) newValue += Common.GetHeroInt(h, false);
-                    Common.SetHeroInt(h, newValue, true);
-                    break;
-                default:
-                    Logger.Error("WarEX", "Invalid Primary Stats");
-                    break;
-            }
         }
 
         public static float GetLocZ(float xPos, float yPos)

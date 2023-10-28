@@ -11,6 +11,7 @@ namespace Launcher
     {
         private static readonly SHA512 shaHash = SHA512.Create();
         private static readonly UTF8Encoding utf8Encoder = new(false, false);
+        private static readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
         //private static readonly Encoding asciiEncoding = Encoding.ASCII
 
         // Caching for name confuser
@@ -25,12 +26,31 @@ namespace Launcher
         /// <returns>An unsafe byte array (hash) that could exceed 0x200</returns>
         public static byte[] ConfuseName(string original)
         {
-            byte[] bytes = utf8Encoder.GetBytes(original.ToUpperInvariant());
-            var hashed = shaHash.ComputeHash(bytes);
+            byte[] stringBytes = utf8Encoder.GetBytes(original.ToUpperInvariant());
+            var salt = new byte[Random.Shared.Next(1, Math.Max(stringBytes.Length / 2, 4))];
+            rng.GetBytes(salt);
+
+            var salted = new byte[stringBytes.Length + salt.Length];
+            Array.Copy(stringBytes, salted, stringBytes.Length);
+            Array.Copy(salt, salt.Length, salted, salted.Length, salt.Length);
+
+            var hashed = shaHash.ComputeHash(stringBytes);
 
             _confuseMap[original] = hashed;
 
             return hashed;
+        }
+
+        /// <summary>
+        /// Return the string that is have already confused
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns>The <paramref name="original"/> string if the given original name has not been confused</returns>
+        public static string GetConfusedName(string original)
+        {
+            if (!_confuseMap.TryGetValue(original, out var hashed)) return original;
+
+            return NormalizeName(hashed).ToString();
         }
 
         /// <summary>
@@ -75,9 +95,9 @@ namespace Launcher
             return true;
         }
 
-        public static bool IsValidForProtect(string name)
+        public static bool IsValidForConfuseName(string name)
         {
-            if (name.ToLower().StartsWith("war3map")) return false;
+            if (name.StartsWith("war3map", StringComparison.InvariantCultureIgnoreCase)) return false;
             var extension = Path.GetExtension(name);
             if (extension == "j" || extension == "lua" || extension == "txt" || extension == "slk") return false;
 
@@ -86,7 +106,7 @@ namespace Launcher
 
         public static string MinifyScript(string script)
         {
-            var result = StaticNodeJSService.InvokeFromFileAsync<string>(MapBuilder.BASE_PATH + @"Launcher\nodejs\minify.js", null, new object[] { script }).GetAwaiter().GetResult();
+            var result = StaticNodeJSService.InvokeFromFileAsync<string>(BuilderConfig.BASE_PATH + @"Launcher\nodejs\minify.js", null, new object[] { script }).GetAwaiter().GetResult();
 
             return result;
         }

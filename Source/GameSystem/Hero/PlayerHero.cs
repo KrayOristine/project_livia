@@ -1,5 +1,5 @@
 ﻿// ------------------------------------------------------------------------------
-// <copyright file="StatSystem.cs" company="Kray Oristine">
+// <copyright file="PlayerHero.cs" company="Kray Oristine">
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -14,23 +14,33 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // </copyright>
 // ------------------------------------------------------------------------------
-using Source.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static War3Api.Common;
 
-// Shorthand for Update, since i lazy as fuck
-using UpdateAction = System.Action<War3Api.Common.unit, float, float, Source.GameSystem.Stats.Mode>;
-
-namespace Source.GameSystem.Stats
+namespace Source.GameSystem.Hero
 {
-    /// <summary>
-    /// Core class that handle stat modification
-    /// </summary>
-    public static class StatSystem
+    public sealed class PlayerHero
     {
+        private static readonly Dictionary<unit, PlayerHero> _heroDict = new();
+        private readonly unit _handle;
+        private int _heroClass;
 
+        public unit Handle { get => _handle; }
+        public HeroClass Classes { get => _heroClass; }
 
-        s
+        public PlayerHero(player whichPlayer, int uid, HeroClass classType)
+        {
+            _handle = new(whichPlayer, uid, 0, 0);
+            _heroClass = (int)classType;
+        }
+
+        public static PlayerHero? FromUnit(unit u) => _heroDict.TryGetValue(u, out var hero) ? hero : null;
+
+        public bool IsClass(HeroClass whichClass) => (_heroClass & (int)whichClass) > 0;
+        public bool IsClass(int classBitfield) => (_heroClass & classBitfield) > 0;
     }
 }
