@@ -20,6 +20,7 @@ namespace Launcher
         {
             if (isDebugBuild) return File.ReadAllText(Path.Join(SIGNATURE_PATH, "priv", "debug.pem"));
 
+
             var rnd = new JavaRandom(DateTime.Now.Ticks);
             int r = rnd.NextInt(11);
             var result = new StringBuilder();
