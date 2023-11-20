@@ -16,7 +16,7 @@
 		<PackageReference Include="WCSharp.DateTime" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Dummies" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Effects" Version="3.0.0-rc1" />
-		<PackageReference Include="WCSharp.Events" Version="3.0.0-rc1" />
+		<PackageReference Include="WCSharp.Events" Version="3.0.0-rc3" />
 		<PackageReference Include="WCSharp.Json" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Knockbacks" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Lightnings" Version="3.0.0-rc1" />
