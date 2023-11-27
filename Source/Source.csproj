@@ -21,7 +21,7 @@
 		<PackageReference Include="WCSharp.Knockbacks" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Lightnings" Version="3.0.0-rc1" />
 		<PackageReference Include="WCSharp.Missiles" Version="3.0.0-rc1" />
-		<PackageReference Include="WCSharp.Shared" Version="3.0.0-rc1" />
+		<PackageReference Include="WCSharp.Shared" Version="3.0.0-rc3" />
     <ProjectReference Include="D:\dev\War3ApiEx\src\War3Api.Common\War3Api.Common.csproj" />
     <ProjectReference Include="D:\dev\War3ApiEx\src\War3Api.Blizzard\War3Api.Blizzard.csproj" />
 	</ItemGroup>
